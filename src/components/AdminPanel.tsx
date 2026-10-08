@@ -102,6 +102,16 @@ export function AdminPanel() {
         <p className="mt-2 text-fg-soft">
           {hosts?.length ?? 0} anfitrião(ões) · {properties.length} imóvel(is)
         </p>
+        <button
+          type="button"
+          onClick={async () => {
+            await logout()
+            setAuth('out')
+          }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-3 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
+        >
+          <LogOut className="h-3.5 w-3.5" /> Sair
+        </button>
       </header>
 
       {message && (
