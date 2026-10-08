@@ -99,7 +99,7 @@ export function AdminPanel() {
 
   return (
     <Frame>
-      <header>
+      <header className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">Administração</p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Clientes e imóveis</h1>
         <p className="mt-2 text-fg-soft">
