@@ -3,6 +3,7 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 
 import '../styles.css'
 import { themeInitScript } from '@/components/ThemeToggle'
+import { AuthCallback } from '@/components/AuthCallback'
 
 const siteName = 'Reposto — Abastecimento recorrente para imóveis de temporada'
 const siteDescription =
@@ -64,6 +65,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <AuthCallback />
         <Scripts />
       </body>
     </html>
