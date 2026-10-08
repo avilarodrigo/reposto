@@ -100,11 +100,12 @@ export function AdminPanel() {
   return (
     <Frame>
       <header className="flex items-start justify-between gap-4">
+        <div>
         <p className="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">Administração</p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Clientes e imóveis</h1>
         <p className="mt-2 text-fg-soft">
           {hosts?.length ?? 0} anfitrião(ões) · {properties.length} imóvel(is)
-        </p>
+        </p></div>
         <button
           type="button"
           onClick={async () => {
