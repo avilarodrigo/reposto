@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lp",
+  "compatibility_date": "2026-10-12",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "reposto-db",
+      "database_id": "c227d200-3b96-4e43-b8e8-4ff85983c45d"
+    }
+  ],
+  "vars": {
+    "ADMIN_EMAILS": "admin@reposto.com",
+    "WHATSAPP_NUMBER": "5500900000000"
+  }
+}
