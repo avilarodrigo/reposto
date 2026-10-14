@@ -1,4 +1,4 @@
-import { acceptInvite, handleAuthCallback, updateUser } from '@netlify/identity'
+import { acceptInvite, handleAuthCallback, updateUser } from '@/lib/auth'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 
