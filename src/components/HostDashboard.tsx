@@ -1,6 +1,6 @@
 import { LogOut, Loader2, TriangleAlert } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
-import { getUser, login, logout } from '@netlify/identity'
+import { getUser, login, logout } from '@/lib/auth'
 import { updatedLabel, type PropertySummary } from '@/lib/stock'
 
 type Dashboard = {
