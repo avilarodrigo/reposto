@@ -2,7 +2,7 @@ import { MessageCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { whatsappLink } from '@/lib/whatsapp'
 
-const heroImg = '/.netlify/images?url=/img/hero.png&w=1200&fm=webp&q=78'
+const heroImg = '/img/hero.png?w=1200&fm=webp&q=78'
 
 export function Hero() {
   return (
