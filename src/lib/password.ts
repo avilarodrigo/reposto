@@ -8,7 +8,6 @@ function toHex(buf: ArrayBuffer): string {
 function fromHex(hex: string): Uint8Array {
   const arr = new Uint8Array(hex.length / 2)
   for (let i = 0; i < arr.length; i++) {
-    // CORREÇÃO: Substring garante compatibilidade total com a runtime da Cloudflare
     arr[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16)
   }
   return arr
@@ -29,6 +28,7 @@ export async function verifyPassword(password: string, stored: string): Promise<
   try {
     if (!stored || typeof stored !== 'string') return false
     
+    // CORREÇÃO: O split deve usar apenas '\$', sem barras invertidas textuais
     const parts = stored.split('\$')
     if (parts.length !== 4 || parts[0] !== 'pbkdf2') return false
     
@@ -44,7 +44,6 @@ export async function verifyPassword(password: string, stored: string): Promise<
     )
     return toHex(derived) === expected
   } catch (error) {
-    // Impede que exceções joguem Erro 500 no Worker, tratando o caso como falha de validação
     console.error('Erro ao verificar senha:', error)
     return false
   }
