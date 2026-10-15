@@ -7,7 +7,10 @@ function toHex(buf: ArrayBuffer): string {
 
 function fromHex(hex: string): Uint8Array {
   const arr = new Uint8Array(hex.length / 2)
-  for (let i = 0; i < arr.length; i++) arr[i] = parseInt(hex.substr(i * 2, 2), 16)
+  for (let i = 0; i < arr.length; i++) {
+    // CORREÇÃO: Substring garante compatibilidade total com a runtime da Cloudflare
+    arr[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16)
+  }
   return arr
 }
 
@@ -23,16 +26,26 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  const parts = stored.split('$')
-  if (parts.length !== 4 || parts[0] !== 'pbkdf2') return false
-  const iterations = Number(parts[1])
-  const salt = fromHex(parts[2])
-  const expected = parts[3]
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits'])
-  const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
-    key,
-    KEY_LENGTH * 8,
-  )
-  return toHex(derived) === expected
+  try {
+    if (!stored || typeof stored !== 'string') return false
+    
+    const parts = stored.split('\$')
+    if (parts.length !== 4 || parts[0] !== 'pbkdf2') return false
+    
+    const iterations = Number(parts[1])
+    const salt = fromHex(parts[2])
+    const expected = parts[3]
+    
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits'])
+    const derived = await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+      key,
+      KEY_LENGTH * 8,
+    )
+    return toHex(derived) === expected
+  } catch (error) {
+    // Impede que exceções joguem Erro 500 no Worker, tratando o caso como falha de validação
+    console.error('Erro ao verificar senha:', error)
+    return false
+  }
 }
