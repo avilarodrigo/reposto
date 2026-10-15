@@ -26,3 +26,23 @@ export const Route = createFileRoute('/api/auth/login')({
 
         const token = await signJwt(
           { sub: user.id, email: user.email, name: user.name, role: user.role },
+          env.JWT_SECRET,
+        )
+        return new Response(JSON.stringify(user), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': sessionCookie(token),
+          },
+        })
+      },
+    },
+  },
+})
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
