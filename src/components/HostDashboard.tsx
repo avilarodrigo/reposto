@@ -2,6 +2,7 @@ import { LogOut, Loader2, TriangleAlert, ArrowLeft } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { getUser, login, logout } from '@/lib/auth'
 import { updatedLabel, type PropertySummary } from '@/lib/stock'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 type Dashboard = {
   portfolio: { activeProperties: number; alertProperties: number; averagePct: number | null }
@@ -42,13 +43,16 @@ export function HostDashboard() {
           <p className="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">Painel do anfitrião</p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Estoque da carteira</h1>
         </div>
-        <button
-          type="button"
-          onClick={async () => { await logout(); setAuth('out') }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-3 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
-        >
-          <LogOut className="h-3.5 w-3.5" /> Sair
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={async () => { await logout(); setAuth('out') }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-3 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sair
+          </button>
+        </div>
       </header>
 
       <section className="mt-8 grid grid-cols-3 gap-3">
@@ -76,165 +80,3 @@ export function HostDashboard() {
                     <p className="mt-1 text-xs text-fg-muted">{lastUpdated ? updatedLabel(lastUpdated) : "Atualização pendente"}</p>
                   </div>
                   <StatusBadge alert={alert} />
-                </button>
-
-                <div className="mt-5 flex items-center gap-4">
-                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={`h-full origin-left rounded-full transition-transform duration-700 ${alert ? 'bg-brand' : 'bg-success'}`}
-                      style={{ transform: `scaleX(${(p.averagePct ?? 0) / 100})` }}
-                    />
-                  </div>
-                  <span className="w-12 text-right text-sm font-semibold tabular-nums">{p.averagePct ?? '—'}%</span>
-                </div>
-
-                {expanded && (
-                  <ul className="mt-5 divide-y divide-fg/10 border-t border-fg/10">
-                    {p.items.map((item) => {
-                      const low = item.pct < item.threshold
-                      return (
-                        <li key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 py-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">{item.name}</p>
-                          </div>
-                          <span className={`text-sm font-semibold tabular-nums ${low ? 'text-brand' : 'text-fg-soft'}`}>{item.pct}%</span>
-                          <div className="col-span-2 mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                            <div className={`h-full origin-left rounded-full ${low ? 'bg-brand' : 'bg-success'}`} style={{ transform: `scaleX(${item.pct / 100})` }} />
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </Frame>
-  )
-}
-
-function StatusBadge({ alert }: { alert: boolean }) {
-  return (
-    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${alert ? 'bg-brand/10 text-brand' : 'bg-success/15 text-success'}`}>
-      {alert ? 'Repor em 1 dia' : 'Em dia'}
-    </span>
-  )
-}
-
-function Kpi({ value, label, tone }: { value: number | string; label: string; tone?: 'alert' }) {
-  return (
-    <div className="rounded-2xl bg-surface p-4">
-      <p className={`flex items-center gap-1.5 font-display text-2xl font-semibold tabular-nums sm:text-3xl ${tone === 'alert' ? 'text-brand' : ''}`}>
-        {tone === 'alert' && <TriangleAlert className="h-5 w-5" />}
-        {value}
-      </p>
-      <p className="mt-1 text-xs leading-snug text-fg-muted">{label}</p>
-    </div>
-  )
-}
-
-export function LoginForm({ onLogin }: { onLogin: () => void }) {
-  const [screen, setScreen] = useState<'login' | 'forgot'>('login')
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-
-  const submitLogin = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const form = new FormData(e.currentTarget)
-    setBusy(true)
-    setError(null)
-    try {
-      await login(String(form.get('email')), String(form.get('password')))
-      onLogin()
-    } catch {
-      setError('E-mail ou senha inválidos.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  const submitForgot = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const form = new FormData(e.currentTarget)
-    setBusy(true)
-    setError(null)
-    setInfo(null)
-    try {
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: String(form.get('email')).trim() }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.message ?? 'Não foi possível solicitar o reset.')
-      setInfo('Instruções de redefinição enviadas com sucesso.')
-    } catch (err: any) {
-      setError(err.message ?? 'Falha ao processar solicitação.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  if (screen === 'forgot') {
-    return (
-      <form onSubmit={submitForgot} className="mx-auto mt-16 max-w-sm rounded-3xl border border-fg/10 bg-surface p-7">
-        <button
-          type="button"
-          onClick={() => { setScreen('login'); setError(null); setInfo(null) }}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-fg-muted hover:text-fg mb-4"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Voltar para o login
-        </button>
-        <h1 className="font-display text-2xl font-semibold">Recuperar senha</h1>
-        <p className="mt-2 text-xs text-fg-soft">Informe seu e-mail cadastrado para receber um link temporário.</p>
-        <label className="mt-5 block text-sm font-medium">
-          E-mail
-          <input name="email" type="email" required autoComplete="email" className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" />
-        </label>
-        {error && <p className="mt-3 text-sm text-brand">{error}</p>}
-        {info && <p className="mt-3 text-sm text-success">{info}</p>}
-        <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg disabled:opacity-50">
-          {busy ? 'Enviando…' : 'Enviar link de recuperação'}
-        </button>
-      </form>
-    )
-  }
-
-  return (
-    <form onSubmit={submitLogin} className="mx-auto mt-16 max-w-sm rounded-3xl border border-fg/10 bg-surface p-7">
-      <h1 className="font-display text-2xl font-semibold">Entrar no painel</h1>
-      <label className="mt-6 block text-sm font-medium">
-        E-mail
-        <input name="email" type="email" required autoComplete="email" className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" />
-      </label>
-      <div className="mt-4">
-        <div className="flex justify-between items-center text-sm font-medium">
-          <span>Senha</span>
-          <button
-            type="button"
-            onClick={() => { setScreen('forgot'); setError(null); setInfo(null) }}
-            className="text-xs font-semibold text-brand hover:underline"
-          >
-            Esqueceu sua senha?
-          </button>
-        </div>
-        <input name="password" type="password" required autoComplete="current-password" className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" />
-      </div>
-      {error && <p className="mt-3 text-sm text-brand">{error}</p>}
-      <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg disabled:opacity-50">
-        {busy ? 'Entrando…' : 'Entrar'}
-      </button>
-    </form>
-  )
-}
-
-function Frame({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="min-h-svh bg-page px-5 py-10 text-fg md:px-8">
-      <div className="mx-auto max-w-5xl">{children}</div>
-    </main>
-  )
-}
