@@ -56,3 +56,30 @@ export async function acceptInvite(token: string, password: string): Promise<Aut
     const body = await res.json().catch(() => ({}))
     throw new Error(body.message ?? 'Convite inválido ou expirado.')
   }
+  cachedUser = (await res.json()) as AuthUser
+  checked = true
+  return cachedUser
+}
+
+/** Só lê o ?token= da URL e o remove da barra de endereço. Não chama o backend. */
+export function handleAuthCallback(): CallbackResult | null {
+  const url = new URL(window.location.href)
+  const token = url.searchParams.get('token')
+  if (!token) return null
+  url.searchParams.delete('token')
+  window.history.replaceState({}, '', url.pathname + url.search + url.hash)
+  return { type: 'invite', token }
+}
+
+export async function updateUser(data: { name?: string; password?: string }): Promise<AuthUser> {
+  const res = await fetch('/api/auth/update', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error('Não foi possível atualizar o perfil.')
+  cachedUser = (await res.json()) as AuthUser
+  checked = true
+  return cachedUser
+}
