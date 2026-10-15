@@ -1,5 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types'
-import { CATALOG } from '@/data/catalog'
+import { catalog as CATALOG } from "@/data/catalog";
 import {
   summarizeProperty,
   summarizePortfolio,
@@ -74,11 +74,13 @@ export type PropertyRow = { id: string; user_id: string; name: string; address: 
 
 export async function createProperty(db: D1Database, userId: string, name: string, address: string | null): Promise<string> {
   const id = crypto.randomUUID()
-  await db.prepare('INSERT INTO properties (id, user_id, name, address) VALUES (?, ?, ?, ?)').bind(id, userId, name, address).run()
-  for (const sku of CATALOG) {
-    await db.prepare('INSERT INTO stock_items (id, property_id, sku_id, name, detail, category, pct, threshold) VALUES (?, ?, ?, ?, ?, ?, 100, 30)')
-      .bind(crypto.randomUUID(), id, sku.id, sku.name, sku.detail, sku.category).run()
-  }
+  await db.batch([
+    db.prepare('INSERT INTO properties (id, user_id, name, address) VALUES (?, ?, ?, ?)').bind(id, userId, name, address),
+    ...CATALOG.map((sku) =>
+      db.prepare('INSERT INTO stock_items (id, property_id, sku_id, name, detail, category, pct, threshold) VALUES (?, ?, ?, ?, ?, ?, 100, 30)')
+        .bind(crypto.randomUUID(), id, sku.id, sku.name, sku.detail, sku.category),
+    ),
+  ])
   return id
 }
 
