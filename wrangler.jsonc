@@ -2,10 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "lp",
   "compatibility_date": "2026-10-12",
-  "assets": {
-    "directory": "./public",
-    "binding": "ASSETS"
-  },
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
   "d1_databases": [
     {
       "binding": "DB",
