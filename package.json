@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "cat node_modules/@tanstack/react-start/package.json | grep -A8 peerDependencies; ls -a; vite build",
     "start": "wrangler dev",
     "deploy": "vite build && wrangler deploy",
     "db:create": "wrangler d1 create reposto-db",
