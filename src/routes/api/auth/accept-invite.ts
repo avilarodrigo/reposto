@@ -38,6 +38,7 @@ export const Route = createFileRoute('/api/auth/accept-invite')({
             const hashed = await hashPassword(password)
             user = await createUser(env.DB, {
               email: invite.email,
+              // AJUSTADO: Retornado o [0] para extrair o texto antes do @ corretamente
               name: invite.email.split('@')[0],
               password: hashed,
               role: invite.role,
