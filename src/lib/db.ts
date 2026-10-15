@@ -151,3 +151,40 @@ export async function consumeInvite(db: D1Database, token: string): Promise<bool
 export async function releaseInvite(db: D1Database, token: string): Promise<void> {
   await db.prepare('UPDATE invites SET accepted_at = NULL WHERE token = ?').bind(token).run()
 }
+
+// No final do seu arquivo lib/db.ts
+
+/** Cria um token de reset válido por 2 horas */
+export async function createPasswordResetToken(db: D1Database, email: string): Promise<string | null> {
+  const user = await findUserByEmail(db, email)
+  if (!user) return null // Evita vazamento de informações se o e-mail não existir
+
+  const token = crypto.randomUUID()
+  const expires = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2 horas
+
+  // Salva na tabela (certifique-se de que a tabela ou coluna exista, ou use uma tabela genérica de tokens)
+  await db.prepare('INSERT INTO password_resets (token, user_id, expires_at) VALUES (?, ?, ?)')
+    .bind(token, user.id, expires).run()
+
+  return token
+}
+
+/** Valida o token e retorna o ID do usuário se estiver tudo correto */
+export async function validateResetToken(db: D1Database, token: string): Promise<string | null> {
+  const row = await db.prepare('SELECT user_id, expires_at, used_at FROM password_resets WHERE token = ?')
+    .bind(token).first<{ user_id: string; expires_at: string; used_at: string | null }>()
+
+  if (!row || row.used_at || new Date(row.expires_at) < new Date()) {
+    return null
+  }
+  return row.user_id
+}
+
+/** Marca o token como usado e atualiza a senha do usuário */
+export async function executePasswordReset(db: D1Database, token: string, userId: string, hashed: string): Promise<void> {
+  await db.batch([
+    db.prepare('UPDATE users SET password = ?, updated_at = datetime(\'now\') WHERE id = ?').bind(hashed, userId),
+    db.prepare('UPDATE password_resets SET used_at = datetime(\'now\') WHERE token = ?').bind(token)
+  ])
+}
+
