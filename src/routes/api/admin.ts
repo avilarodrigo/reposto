@@ -49,7 +49,7 @@ export const Route = createFileRoute('/api/admin')({
         const body = await request.json<any>()
 
         switch (String(body.action ?? '')) {
-          case 'create-invite': {
+         case 'create-invite': {
             const email = String(body.email ?? '').toLowerCase().trim()
             if (!email || !email.includes('@')) {
               return json({ message: 'E-mail inválido.' }, 400)
@@ -57,17 +57,12 @@ export const Route = createFileRoute('/api/admin')({
             if (await findUserByEmail(env.DB, email)) {
               return json({ message: 'Este e-mail já tem conta.' }, 409)
             }
-            const { token, expiresAt } = await createInvite(env.DB, {
-              email,
-              role: 'host', // convites criam só anfitriões; admins são criados direto no banco
-              createdBy: admin.sub,
-            })
+            const token = await createInvite(env.DB, email, 'host')
             const link = `${new URL(request.url).origin}/?token=${token}`
             return json({
               ok: true,
               link,
-              expiresAt,
-              message: 'Convite criado. Envie o link ao anfitrião.',
+              message: 'Convite criado (válido por 7 dias). Envie o link ao anfitrião.',
             })
           }
 
