@@ -106,7 +106,7 @@ export async function getStockItems(db: D1Database, propertyId: string): Promise
     category: row.category,
     pct: row.pct,
     threshold: row.threshold,
-    updatedAt: row.updated_at, // <--- Converte snake_case para camelCase
+    updatedAt: row.updated_at,
   }))
 }
 
@@ -120,7 +120,7 @@ export async function getDashboardData(db: D1Database, userId: string) {
       name: prop.name, 
       address: prop.address, 
       items,
-      updatedAt: prop.updated_at || new Date().toISOString()
+      updatedAt: prop.updated_at
     }))
   }
   return { portfolio: summarizePortfolio(summaries), properties: summaries }
@@ -135,7 +135,7 @@ export async function getPropertySummary(db: D1Database, propertyId: string): Pr
     name: prop.name, 
     address: prop.address, 
     items,
-    updatedAt: prop.updated_at || new Date().toISOString()
+    updatedAt: prop.updated_at
   })
 }
 
