@@ -75,7 +75,24 @@ export function HostDashboard() {
                 <button type="button" onClick={() => setOpen(expanded ? null : p.id)} className="flex w-full items-start justify-between gap-4 text-left">
                   <div className="min-w-0">
                     <p className="truncate font-display text-xl font-semibold">{p.name}</p>
-                    <p className="mt-1 text-xs text-fg-muted">{updatedLabel(p.updatedAt)}</p>
+// Dentro do map de propriedades em src/components/HostDashboard.tsx:
+{properties.map((p) => {
+  const expanded = open === p.id
+  const alert = p.status === 'repor'
+  return (
+    <li key={p.id} className="rounded-3xl border border-fg/10 bg-surface p-5 sm:p-6">
+      <button type="button" onClick={() => setOpen(expanded ? null : p.id)} className="flex w-full items-start justify-between gap-4 text-left">
+        <div className="min-w-0">
+          <p className="truncate font-display text-xl font-semibold">{p.name}</p>
+          
+          {/* CORREÇÃO AQUI: Garante que o painel exiba a data de modificação e não o status de check-in */}
+          <p className="mt-1 text-xs text-fg-muted">{updatedLabel(p.updatedAt)}</p>
+          
+        </div>
+        <StatusBadge alert={alert} />
+      </button>
+
+      {/* Resto do código do progresso e itens expandidos... */}
                   </div>
                   <StatusBadge alert={alert} />
                 </button>
