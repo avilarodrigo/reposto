@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router' 
 import { env } from 'cloudflare:workers'
 import { verifyJwt, getTokenFromRequest } from '@/lib/jwt'
 import { getDashboardData } from '@/lib/db'
