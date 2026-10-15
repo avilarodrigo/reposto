@@ -27,6 +27,7 @@ export type PropertyStock = {
   name: string
   address: string | null
   items: StockItem[]
+  updatedAt?: string | null
 }
 
 export type PropertyStatus = 'em-dia' | 'repor'
@@ -56,12 +57,14 @@ const latest = (dates: (string | null)[]) =>
 
 export function summarizeProperty(property: PropertyStock): PropertySummary {
   const lowItems = property.items.filter(isLow)
+  const itemsLatest = latest(property.items.map((i) => i.updatedAt || (i as any).updated_at))
+
   return {
     ...property,
     averagePct: average(property.items.map((i) => i.pct)),
     lowItems,
     status: lowItems.length ? 'repor' : 'em-dia',
-    updatedAt: latest(property.items.map((i) => i.updatedAt)),
+    updatedAt: property.updatedAt || itemsLatest, // <--- Usa a data do imóvel ou dos itens
   }
 }
 
