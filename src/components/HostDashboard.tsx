@@ -10,7 +10,6 @@ type Dashboard = {
 
 type Auth = 'checking' | 'out' | 'in'
 
-/** Painel do anfitrião: visão da carteira e estoque de cada imóvel. Exige login. */
 export function HostDashboard() {
   const [auth, setAuth] = useState<Auth>('checking')
   const [data, setData] = useState<Dashboard | null>(null)
@@ -45,10 +44,7 @@ export function HostDashboard() {
         </div>
         <button
           type="button"
-          onClick={async () => {
-            await logout()
-            setAuth('out')
-          }}
+          onClick={async () => { await logout(); setAuth('out') }}
           className="inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-3 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
         >
           <LogOut className="h-3.5 w-3.5" /> Sair
@@ -75,24 +71,7 @@ export function HostDashboard() {
                 <button type="button" onClick={() => setOpen(expanded ? null : p.id)} className="flex w-full items-start justify-between gap-4 text-left">
                   <div className="min-w-0">
                     <p className="truncate font-display text-xl font-semibold">{p.name}</p>
-// Dentro do map de propriedades em src/components/HostDashboard.tsx:
-{properties.map((p) => {
-  const expanded = open === p.id
-  const alert = p.status === 'repor'
-  return (
-    <li key={p.id} className="rounded-3xl border border-fg/10 bg-surface p-5 sm:p-6">
-      <button type="button" onClick={() => setOpen(expanded ? null : p.id)} className="flex w-full items-start justify-between gap-4 text-left">
-        <div className="min-w-0">
-          <p className="truncate font-display text-xl font-semibold">{p.name}</p>
-          
-          {/* CORREÇÃO AQUI: Garante que o painel exiba a data de modificação e não o status de check-in */}
-          <p className="mt-1 text-xs text-fg-muted">{updatedLabel(p.updatedAt)}</p>
-          
-        </div>
-        <StatusBadge alert={alert} />
-      </button>
-
-      {/* Resto do código do progresso e itens expandidos... */}
+                    <p className="mt-1 text-xs text-fg-muted">{updatedLabel(p.updatedAt)}</p>
                   </div>
                   <StatusBadge alert={alert} />
                 </button>
@@ -154,7 +133,6 @@ function Kpi({ value, label, tone }: { value: number | string; label: string; to
   )
 }
 
-/** Formulário de entrada com suporte a alternância de tela para recuperação de acesso. */
 export function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [screen, setScreen] = useState<'login' | 'forgot'>('login')
   const [error, setError] = useState<string | null>(null)
@@ -179,7 +157,6 @@ export function LoginForm({ onLogin }: { onLogin: () => void }) {
   const submitForgot = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
-    const email = String(form.get('email')).trim()
     setBusy(true)
     setError(null)
     setInfo(null)
@@ -187,11 +164,11 @@ export function LoginForm({ onLogin }: { onLogin: () => void }) {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: String(form.get('email')).trim() }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.message ?? 'Não foi possível solicitar o reset.')
-      setInfo('Instruções de redefinição enviadas com sucesso para o seu e-mail.')
+      setInfo('Instruções de redefinição enviadas com sucesso.')
     } catch (err: any) {
       setError(err.message ?? 'Falha ao processar solicitação.')
     } finally {
@@ -205,21 +182,19 @@ export function LoginForm({ onLogin }: { onLogin: () => void }) {
         <button
           type="button"
           onClick={() => { setScreen('login'); setError(null); setInfo(null) }}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-fg-muted hover:text-fg mb-4 transition"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-fg-muted hover:text-fg mb-4"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar para o login
         </button>
         <h1 className="font-display text-2xl font-semibold">Recuperar senha</h1>
-        <p className="mt-2 text-xs text-fg-soft leading-relaxed">
-          Informe seu e-mail cadastrado. Se ele constar no sistema, você receberá um link temporário para criar uma nova senha.
-        </p>
+        <p className="mt-2 text-xs text-fg-soft">Informe seu e-mail cadastrado para receber um link temporário.</p>
         <label className="mt-5 block text-sm font-medium">
           E-mail
           <input name="email" type="email" required autoComplete="email" className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" />
         </label>
         {error && <p className="mt-3 text-sm text-brand">{error}</p>}
-        {info && <p className="mt-3 text-sm text-success font-medium">{info}</p>}
-        <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg transition active:scale-[0.98] disabled:opacity-50">
+        {info && <p className="mt-3 text-sm text-success">{info}</p>}
+        <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg disabled:opacity-50">
           {busy ? 'Enviando…' : 'Enviar link de recuperação'}
         </button>
       </form>
@@ -229,12 +204,10 @@ export function LoginForm({ onLogin }: { onLogin: () => void }) {
   return (
     <form onSubmit={submitLogin} className="mx-auto mt-16 max-w-sm rounded-3xl border border-fg/10 bg-surface p-7">
       <h1 className="font-display text-2xl font-semibold">Entrar no painel</h1>
-      
       <label className="mt-6 block text-sm font-medium">
         E-mail
         <input name="email" type="email" required autoComplete="email" className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" />
       </label>
-      
       <div className="mt-4">
         <div className="flex justify-between items-center text-sm font-medium">
           <span>Senha</span>
@@ -246,18 +219,10 @@ export function LoginForm({ onLogin }: { onLogin: () => void }) {
             Esqueceu sua senha?
           </button>
         </div>
-        <input 
-          name="password" 
-          type="password" 
-          required 
-          autoComplete="current-password" 
-          className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" 
-        />
+        <input name="password" type="password" required autoComplete="current-password" className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" />
       </div>
-
       {error && <p className="mt-3 text-sm text-brand">{error}</p>}
-      
-      <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg transition active:scale-[0.98] disabled:opacity-50">
+      <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg disabled:opacity-50">
         {busy ? 'Entrando…' : 'Entrar'}
       </button>
     </form>
