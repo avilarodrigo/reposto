@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
-import { getAllHosts, createUser, createInvite, findUserByEmail } from '@/lib/db'
+import { getAllHosts, findUserByEmail, createInvite } from '@/lib/db'
 
 export const Route = createFileRoute('/api/admin')({
   server: {
@@ -23,6 +23,21 @@ export const Route = createFileRoute('/api/admin')({
           const { action } = body
 
           // ==========================================
+          // ACTION: GERAR DADOS DE DEMONSTRAÇÃO
+          // ==========================================
+          if (action === 'generate-demo-data' || action === 'seed-demo') {
+            const { hostId } = body
+            if (!hostId) {
+              return json({ message: 'ID do anfitrião é obrigatório para gerar dados.' }, 400)
+            }
+
+            const { seedDemoProperties } = await import('@/lib/db')
+            await seedDemoProperties(env.DB, hostId)
+
+            return json({ success: true, message: 'Imóveis de demonstração criados com sucesso!' }, 200)
+          }
+
+          // ==========================================
           // FLUXO DE CRIAR NOVO ANFITRIÃO (CADASTRO)
           // ==========================================
           if (action === 'create-host') {
@@ -34,19 +49,13 @@ export const Route = createFileRoute('/api/admin')({
               return json({ message: 'Nome e e-mail são obrigatórios.' }, 400)
             }
 
-            // 1. Verifica se o usuário já existe para evitar erro de constraint única no D1
             const existingUser = await findUserByEmail(env.DB, email)
             if (existingUser) {
               return json({ message: 'Este e-mail já está cadastrado no sistema.' }, 409)
             }
 
             try {
-              // 2. Cria o token de convite na tabela do banco D1
               const token = await createInvite(env.DB, email, 'host')
-              
-              // 3. Opcional: Se seu fluxo exige criar o registro desativado primeiro, você chamaria o createUser aqui.
-              // Como seu formulário diz "Ele entra no painel com o mesmo e-mail", geramos o convite com sucesso.
-              
               return json({ 
                 success: true, 
                 message: 'Anfitrião pré-cadastrado e convite gerado com sucesso.',
@@ -69,7 +78,6 @@ export const Route = createFileRoute('/api/admin')({
             if (!hostId || !name) {
               return json({ message: 'Campos obrigatórios ausentes.' }, 400)
             }
-            // Importação dinâmica ou chamada do seu método corrigido do createProperty
             const { createProperty } = await import('@/lib/db')
             const propertyId = await createProperty(env.DB, hostId, name, address)
             return json({ success: true, propertyId }, 200)
@@ -79,7 +87,7 @@ export const Route = createFileRoute('/api/admin')({
         } catch (globalError: any) {
           console.error('Erro global na API do Admin:', globalError)
           return json({ 
-            message: 'Erro interno no processamento do cadastro.',
+            message: 'Erro interno no processamento da ação administrativa.',
             error: globalError.message 
           }, 500)
         }
