@@ -2,7 +2,7 @@ import { Loader2, Plus, Sparkles, LogOut } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { LoginForm } from '@/components/HostDashboard'
 import { getUser, login, logout } from '@/lib/auth'
-
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 type Property = { id: string; name: string; address: string | null; active: boolean }
 type Host = { id: string; email: string; name: string | null; whatsapp: string | null; identityId: string | null; properties: Property[] }
@@ -99,21 +99,25 @@ export function AdminPanel() {
     <Frame>
       <header className="flex items-start justify-between gap-4">
         <div>
-        <p className="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">Administração</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Clientes e imóveis</h1>
-        <p className="mt-2 text-fg-soft">
-          {hosts?.length ?? 0} anfitrião(ões) · {properties.length} imóvel(is)
-        </p></div>
-        <button
-          type="button"
-          onClick={async () => {
-            await logout()
-            setAuth('out')
-          }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-3 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
-        >
-          <LogOut className="h-3.5 w-3.5" /> Sair
-        </button>
+          <p className="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">Administração</p>
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Clientes e imóveis</h1>
+          <p className="mt-2 text-fg-soft">
+            {hosts?.length ?? 0} anfitrião(ões) · {properties.length} imóvel(is)
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={async () => {
+              await logout()
+              setAuth('out')
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-3 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sair
+          </button>
+        </div>
       </header>
 
       {message && (
