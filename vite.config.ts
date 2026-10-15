@@ -7,8 +7,7 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 export default defineConfig({
   plugins: [
     tsConfigPaths(),
-    cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tanstackStart(),
-    viteReact(), // depois do tanstackStart
+    viteReact(),
   ],
 })
