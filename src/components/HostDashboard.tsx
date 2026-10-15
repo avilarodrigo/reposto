@@ -117,7 +117,6 @@ export function HostDashboard() {
     </Frame>
   )
 }
-
 function StatusBadge({ alert }: { alert: boolean }) {
   return (
     <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${alert ? 'bg-brand/10 text-brand' : 'bg-success/15 text-success'}`}>
@@ -220,3 +219,38 @@ export function LoginForm({ onLogin }: { onLogin: () => void }) {
       </label>
       
       <div className="mt-4">
+        <div className="flex justify-between items-center text-sm font-medium">
+          <span>Senha</span>
+          <button
+            type="button"
+            onClick={() => { setScreen('forgot'); setError(null); setInfo(null) }}
+            className="text-xs font-semibold text-brand hover:underline"
+          >
+            Esqueceu sua senha?
+          </button>
+        </div>
+        <input 
+          name="password" 
+          type="password" 
+          required 
+          autoComplete="current-password" 
+          className="mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand" 
+        />
+      </div>
+
+      {error && <p className="mt-3 text-sm text-brand">{error}</p>}
+      
+      <button type="submit" disabled={busy} className="mt-6 w-full rounded-full bg-inverse py-3 font-semibold text-inverse-fg transition active:scale-[0.98] disabled:opacity-50">
+        {busy ? 'Entrando…' : 'Entrar'}
+      </button>
+    </form>
+  )
+}
+
+function Frame({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="min-h-svh bg-page px-5 py-10 text-fg md:px-8">
+      <div className="mx-auto max-w-5xl">{children}</div>
+    </main>
+  )
+}
