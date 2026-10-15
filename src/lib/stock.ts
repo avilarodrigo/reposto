@@ -57,14 +57,15 @@ const latest = (dates: (string | null)[]) =>
 
 export function summarizeProperty(property: PropertyStock): PropertySummary {
   const lowItems = property.items.filter(isLow)
-  const itemsLatest = latest(property.items.map((i) => i.updatedAt || (i as any).updated_at))
+  const itemDates = property.items.map((i) => i.updatedAt || (i as any).updated_at)
+  const itemsLatest = latest(itemDates)
 
   return {
     ...property,
     averagePct: average(property.items.map((i) => i.pct)),
     lowItems,
     status: lowItems.length ? 'repor' : 'em-dia',
-    updatedAt: property.updatedAt || itemsLatest, // <--- Usa a data do imóvel ou dos itens
+    updatedAt: property.updatedAt || itemsLatest || null,
   }
 }
 
