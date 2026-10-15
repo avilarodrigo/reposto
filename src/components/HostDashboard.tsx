@@ -71,7 +71,7 @@ export function HostDashboard() {
                 <button type="button" onClick={() => setOpen(expanded ? null : p.id)} className="flex w-full items-start justify-between gap-4 text-left">
                   <div className="min-w-0">
                     <p className="truncate font-display text-xl font-semibold">{p.name}</p>
-                    <p className="mt-1 text-xs text-fg-muted">{updatedLabel(p.updatedAt)}</p>
+                    <p className="mt-1 text-xs text-fg-muted">{p.updatedAt ? updatedLabel(p.updatedAt) : "Atualização pendente"}</p>
                   </div>
                   <StatusBadge alert={alert} />
                 </button>
@@ -94,7 +94,7 @@ export function HostDashboard() {
                         <li key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 py-3">
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium">{item.name}</p>
-                            <p className="text-xs text-fg-muted">{updatedLabel(item.updatedAt)}</p>
+                            <p className="text-xs text-fg-muted">{item.updateAt ? updateLabel(item.updateAt) : "Sem registros"}</p>
                           </div>
                           <span className={`text-sm font-semibold tabular-nums ${low ? 'text-brand' : 'text-fg-soft'}`}>{item.pct}%</span>
                           <div className="col-span-2 mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
