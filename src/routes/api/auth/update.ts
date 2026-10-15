@@ -4,6 +4,8 @@ import { verifyJwt, getTokenFromRequest } from '@/lib/jwt'
 import { findUserById, updateUserProfile } from '@/lib/db'
 import { hashPassword } from '@/lib/password'
 
+const MIN_PASSWORD = 8
+
 export const Route = createFileRoute('/api/auth/update')({
   server: {
     handlers: {
@@ -22,7 +24,7 @@ export const Route = createFileRoute('/api/auth/update')({
         if (body.name && String(body.name).trim().length >= 2) {
           updates.name = String(body.name).trim()
         }
-        if (body.password && String(body.password).length >= 6) {
+        if (body.password && String(body.password).length >= MIN_PASSWORD) {
           updates.password = await hashPassword(String(body.password))
         }
         if (!updates.name && !updates.password) {
@@ -30,4 +32,16 @@ export const Route = createFileRoute('/api/auth/update')({
         }
 
         await updateUserProfile(env.DB, user.id, updates)
-        const updated = await findUserById(env.DB,
+        const updated = await findUserById(env.DB, user.id)
+        return json(updated)
+      },
+    },
+  },
+})
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
