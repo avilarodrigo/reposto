@@ -70,7 +70,6 @@ export async function acceptInvite(db: D1Database, token: string): Promise<void>
   await db.prepare('UPDATE invites SET accepted_at = datetime(\'now\') WHERE token = ?').bind(token).run()
 }
 
-// Encontre e modifique esta linha no seu lib/db.ts
 export type PropertyRow = { id: string; user_id: string; name: string; address: string | null; active: number; updated_at: string | null }
 
 export async function createProperty(db: D1Database, userId: string, name: string, address: string | null): Promise<string> {
@@ -86,12 +85,12 @@ export async function createProperty(db: D1Database, userId: string, name: strin
 }
 
 export async function getPropertiesByUser(db: D1Database, userId: string): Promise<PropertyRow[]> {
-  const result = await db.prepare('SELECT id, user_id, name, address, active FROM properties WHERE user_id = ? ORDER BY name').bind(userId).all<PropertyRow>()
+  const result = await db.prepare('SELECT id, user_id, name, address, active, updated_at FROM properties WHERE user_id = ? ORDER BY name').bind(userId).all<PropertyRow>()
   return result.results
 }
 
 export async function getPropertyById(db: D1Database, propertyId: string): Promise<PropertyRow | null> {
-  return db.prepare('SELECT id, user_id, name, address, active FROM properties WHERE id = ?').bind(propertyId).first<PropertyRow>()
+  return db.prepare('SELECT id, user_id, name, address, active, updated_at FROM properties WHERE id = ?').bind(propertyId).first<PropertyRow>()
 }
 
 export async function getStockItems(db: D1Database, propertyId: string): Promise<StockItem[]> {
@@ -104,7 +103,13 @@ export async function getDashboardData(db: D1Database, userId: string) {
   const summaries: PropertySummary[] = []
   for (const prop of properties) {
     const items = await getStockItems(db, prop.id)
-    summaries.push(summarizeProperty({ id: prop.id, name: prop.name, address: prop.address, items }))
+    summaries.push(summarizeProperty({ 
+      id: prop.id, 
+      name: prop.name, 
+      address: prop.address, 
+      items,
+      updatedAt: prop.updated_at || new Date().toISOString()
+    }))
   }
   return { portfolio: summarizePortfolio(summaries), properties: summaries }
 }
@@ -113,7 +118,13 @@ export async function getPropertySummary(db: D1Database, propertyId: string): Pr
   const prop = await getPropertyById(db, propertyId)
   if (!prop) return null
   const items = await getStockItems(db, propertyId)
-  return summarizeProperty({ id: prop.id, name: prop.name, address: prop.address, items })
+  return summarizeProperty({ 
+    id: prop.id, 
+    name: prop.name, 
+    address: prop.address, 
+    items,
+    updatedAt: prop.updated_at || new Date().toISOString()
+  })
 }
 
 export type HostWithProperties = {
@@ -139,7 +150,7 @@ export async function seedDemoProperties(db: D1Database, userId: string): Promis
   ]
   for (const d of demos) await createProperty(db, userId, d.name, d.address)
 }
-// Reserva o convite de forma atômica: só uma requisição consegue.
+
 export async function consumeInvite(db: D1Database, token: string): Promise<boolean> {
   const r = await db
     .prepare("UPDATE invites SET accepted_at = datetime('now') WHERE token = ? AND accepted_at IS NULL")
@@ -148,44 +159,30 @@ export async function consumeInvite(db: D1Database, token: string): Promise<bool
   return (r.meta.changes ?? 0) === 1
 }
 
-// Devolve o convite caso a criação do usuário falhe.
 export async function releaseInvite(db: D1Database, token: string): Promise<void> {
   await db.prepare('UPDATE invites SET accepted_at = NULL WHERE token = ?').bind(token).run()
 }
 
-// No final do seu arquivo lib/db.ts
-
-/** Cria um token de reset válido por 2 horas */
 export async function createPasswordResetToken(db: D1Database, email: string): Promise<string | null> {
   const user = await findUserByEmail(db, email)
-  if (!user) return null // Evita vazamento de informações se o e-mail não existir
-
+  if (!user) return null
   const token = crypto.randomUUID()
-  const expires = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2 horas
-
-  // Salva na tabela (certifique-se de que a tabela ou coluna exista, ou use uma tabela genérica de tokens)
+  const expires = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
   await db.prepare('INSERT INTO password_resets (token, user_id, expires_at) VALUES (?, ?, ?)')
     .bind(token, user.id, expires).run()
-
   return token
 }
 
-/** Valida o token e retorna o ID do usuário se estiver tudo correto */
 export async function validateResetToken(db: D1Database, token: string): Promise<string | null> {
   const row = await db.prepare('SELECT user_id, expires_at, used_at FROM password_resets WHERE token = ?')
     .bind(token).first<{ user_id: string; expires_at: string; used_at: string | null }>()
-
-  if (!row || row.used_at || new Date(row.expires_at) < new Date()) {
-    return null
-  }
+  if (!row || row.used_at || new Date(row.expires_at) < new Date()) return null
   return row.user_id
 }
 
-/** Marca o token como usado e atualiza a senha do usuário */
 export async function executePasswordReset(db: D1Database, token: string, userId: string, hashed: string): Promise<void> {
   await db.batch([
     db.prepare('UPDATE users SET password = ?, updated_at = datetime(\'now\') WHERE id = ?').bind(hashed, userId),
     db.prepare('UPDATE password_resets SET used_at = datetime(\'now\') WHERE token = ?').bind(token)
   ])
 }
-
