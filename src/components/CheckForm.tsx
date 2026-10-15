@@ -1,130 +1,167 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, Loader2 } from 'lucide-react'
-import { type PropertySummary, updatedLabel } from '@/lib/stock'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { useState, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 
-type Props = { propertyId: string }
+type StockItem = { id: string; name: string; detail: string | null; category: string; pct: number }
+type PropertySummary = { id: string; name: string; address: string | null; items: StockItem[] }
 
-/** Formulário de reposição de itens via QR Code. Público (sem autenticação). */
-export function CheckForm({ propertyId }: Props) {
-  const [data, setData] = useState<PropertySummary | null>(null)
+export function CheckForm({ propertyId }: { propertyId: string }) {
+  const [property, setProperty] = useState<PropertySummary | null>(null)
+  const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  const [message, setMessage] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
+  
+  // Mapeia alterações locais temporárias: { itemId: pct }
+  const [changes, setChanges] = useState<Record<string, number>>({})
 
   useEffect(() => {
     fetch(`/api/check/${propertyId}`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((body: PropertySummary) => setData(body))
-      .catch((e) => setMessage({ tone: 'error', text: `Imóvel não encontrado (${e}).` }))
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data: PropertySummary) => {
+        setProperty(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [propertyId])
 
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!data) return
-
-    const form = new FormData(e.currentTarget)
-    const items = data.items
-      .filter((_, i) => form.get(`item-${i}`) === 'on')
-      .map((item) => {
-        const qty = Number(form.get(`qty-${item.id}`)) || 1
-        return `${qty}× ${item.name}`
-      })
-
-    if (items.length === 0) {
-      setMessage({ tone: 'error', text: 'Selecione pelo menos um item.' })
-      return
-    }
-
-    setBusy(true)
-
-    const host = data
-    const message = `Reposição para ${host.name}:\n\n${items.join('\n')}`
-    const link = `https://wa.me/5511987654321?text=${encodeURIComponent(message)}`
-
-    window.location.href = link
+  const handleSelectLevel = (itemId: string, pctValue: number) => {
+    setChanges((prev) => ({ ...prev, [itemId]: pctValue }))
   }
 
+  const handleSave = async () => {
+    const totalChanges = Object.keys(changes).length
+    if (totalChanges === 0) return
+    
+    setBusy(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch(`/api/check/${propertyId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: changes }),
+      })
+      
+      if (!res.ok) throw new Error()
+      
+      setMessage({ tone: 'ok', text: 'Estoque atualizado e enviado para o painel!' })
+      setChanges({})
+      
+      // Atualiza o estado local do componente com os novos valores
+      if (property) {
+        const updatedItems = property.items.map((item) => 
+          changes[item.id] !== undefined ? { ...item, pct: changes[item.id] } : item
+        )
+        setProperty({ ...property, items: updatedItems })
+      }
+    } catch {
+      setMessage({ tone: 'err', text: 'Não foi possível sincronizar o estoque.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="mt-16 flex justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-fg-muted" />
+      </div>
+    )
+  }
+
+  if (!property) {
+    return (
+      <div className="mt-12 text-center text-fg-soft font-medium">
+        Imóvel não localizado ou QR Code inativo.
+      </div>
+    )
+  }
+
+  const categories = Array.from(new Set(property.items.map((i) => i.category)))
+
   return (
-    <main className="min-h-svh bg-page px-5 py-10 text-fg md:px-8">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="font-display text-3xl font-semibold">Reposição</h1>
-          <ThemeToggle />
-        </div>
+    <div className="pb-24">
+      <header>
+        <p className="text-xs font-semibold tracking-[0.18em] text-fg-muted uppercase">Reposição</p>
+        <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{property.name}</h1>
+        {property.address && <p className="text-sm text-fg-soft mt-1">{property.address}</p>}
+        <p className="mt-3 text-sm text-fg-soft leading-relaxed">
+          Toque no nível de cada item. Só o que você marcar será atualizado.
+        </p>
+      </header>
 
-        {message && (
-          <div className={`rounded-2xl px-4 py-3 text-sm font-medium ${message.tone === 'ok' ? 'bg-success/15 text-success' : 'bg-brand/10 text-brand'}`}>
-            {message.text}
-          </div>
-        )}
+      {message && (
+        <p role="status" className={`mt-5 rounded-2xl px-4 py-3 text-sm font-medium text-center ${message.tone === 'ok' ? 'bg-success/15 text-success' : 'bg-brand/10 text-brand'}`}>
+          {message.text}
+        </p>
+      )}
 
-        {data && (
-          <form onSubmit={submit} className="mt-6 space-y-6">
-            <div className="rounded-3xl border border-fg/10 bg-surface p-6">
-              <p className="text-sm text-fg-muted">Imóvel</p>
-              <p className="mt-1 font-display text-2xl font-semibold">{data.name}</p>
-              {data.address && <p className="mt-2 text-sm text-fg-soft">{data.address}</p>}
-            </div>
+      <div className="mt-8 space-y-8">
+        {categories.map((cat) => (
+          <section key={cat}>
+            <h2 className="text-xs font-bold tracking-[0.15em] uppercase text-fg-muted mb-3.5">{cat}</h2>
+            <div className="space-y-3.5">
+              {property.items
+                .filter((i) => i.category === cat)
+                .map((item) => {
+                  const currentPct = changes[item.id] !== undefined ? changes[item.id] : item.pct
 
-            <div className="space-y-3">
-              <p className="text-sm font-semibold">Itens em estoque</p>
-              {data.items.map((item, idx) => {
-                const low = item.pct < item.threshold
-                return (
-                  <label key={item.id} className="flex items-start gap-3 rounded-2xl border border-fg/10 bg-surface px-4 py-3 transition hover:border-fg/30">
-                    <input
-                      type="checkbox"
-                      name={`item-${idx}`}
-                      defaultChecked={low}
-                      className="mt-0.5 h-5 w-5 cursor-pointer rounded border-fg/30 accent-brand"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium">{item.name}</p>
-                      <p className="mt-1 text-xs text-fg-muted">{updatedLabel(item.updatedAt)}</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                          <div className={`h-full origin-left rounded-full ${low ? 'bg-brand' : 'bg-success'}`} style={{ transform: `scaleX(${item.pct / 100})` }} />
-                        </div>
-                        <span className={`text-xs font-semibold tabular-nums ${low ? 'text-brand' : 'text-fg-soft'}`}>{item.pct}%</span>
+                  return (
+                    <div key={item.id} className="p-4 sm:p-5 bg-surface rounded-3xl border border-fg/10">
+                      <div className="flex justify-between items-baseline mb-3.5">
+                        <h3 className="font-semibold text-base text-fg">{item.name}</h3>
+                        {item.detail && <span className="text-xs text-fg-muted font-medium">{item.detail}</span>}
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-2 text-xs font-semibold">
+                        <button
+                          type="button"
+                          onClick={() => handleSelectLevel(item.id, 100)}
+                          className={`py-2.5 rounded-xl border text-center transition active:scale-95 ${currentPct === 100 ? 'bg-inverse text-inverse-fg border-inverse' : 'bg-page border-fg/15 text-fg-soft'}`}
+                        >
+                          Cheio
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectLevel(item.id, 50)}
+                          className={`py-2.5 rounded-xl border text-center transition active:scale-95 ${currentPct === 50 ? 'bg-inverse text-inverse-fg border-inverse' : 'bg-page border-fg/15 text-fg-soft'}`}
+                        >
+                          Pela metade
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectLevel(item.id, 25)}
+                          className={`py-2.5 rounded-xl border text-center transition active:scale-95 ${currentPct === 25 ? 'bg-inverse text-inverse-fg border-inverse' : 'bg-page border-fg/15 text-fg-soft'}`}
+                        >
+                          Acabando
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectLevel(item.id, 0)}
+                          className={`py-2.5 rounded-xl border text-center transition active:scale-95 ${currentPct === 0 ? 'bg-inverse text-inverse-fg border-inverse' : 'bg-page border-fg/15 text-fg-soft'}`}
+                        >
+                          Acabou
+                        </button>
                       </div>
                     </div>
-                    <input
-                      type="number"
-                      name={`qty-${item.id}`}
-                      defaultValue={1}
-                      min={1}
-                      max={99}
-                      className="w-12 rounded border border-fg/15 bg-page px-2 py-1 text-center text-sm outline-none focus:border-brand"
-                    />
-                  </label>
-                )
-              })}
+                  )
+                })}
             </div>
-
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full rounded-full bg-brand py-4 font-semibold text-inverse-fg transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {busy ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Enviando…
-                </>
-              ) : (
-                <>
-                  Enviar via WhatsApp <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {!data && !message && (
-          <div className="mt-10 flex justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-fg-muted" />
-          </div>
-        )}
+          </section>
+        ))}
       </div>
-    </main>
+
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-page border-t border-fg/5 max-w-5xl mx-auto z-10">
+        <div className="max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={busy || Object.keys(changes).length === 0}
+            className="w-full py-3.5 bg-inverse text-inverse-fg font-semibold rounded-full shadow-sm transition active:scale-[0.98] disabled:opacity-40"
+          >
+            {busy ? 'Salvando alterações…' : Object.keys(changes).length > 0 ? `Salvar ${Object.keys(changes).length} itens` : 'Salvar itens'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
