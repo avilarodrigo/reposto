@@ -92,6 +92,9 @@ export function HostDashboard() {
                       const low = item.pct < item.threshold
                       return (
                         <li key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 py-3">
+                          <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{item.name}</p>
+                          </div>
                           <span className={`text-sm font-semibold tabular-nums ${low ? 'text-brand' : 'text-fg-soft'}`}>{item.pct}%</span>
                           <div className="col-span-2 mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                             <div className={`h-full origin-left rounded-full ${low ? 'bg-brand' : 'bg-success'}`} style={{ transform: `scaleX(${item.pct / 100})` }} />
