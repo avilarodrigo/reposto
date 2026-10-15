@@ -19,7 +19,7 @@ export const Route = createFileRoute('/api/check/$propertyId')({
             return json({ error: 'Payload de atualização inválido.' }, 400)
           }
 
-          // Executa a atualização atômica de cada item de estoque no Cloudflare D1
+          // 1. Atualiza o nível e a data de modificação de cada item de estoque
           const statements = Object.entries(items).map(([itemId, pctValue]) => 
             env.DB.prepare('UPDATE stock_items SET pct = ?, updated_at = datetime(\'now\') WHERE id = ?')
               .bind(Number(pctValue), itemId)
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/api/check/$propertyId')({
           
           await env.DB.batch(statements)
 
-          // Força a atualização do registro pai 'properties' para atualizar o timestamp global
+          // 2. Agora que a coluna existe, atualiza a data global do imóvel para o painel ler!
           await env.DB.prepare('UPDATE properties SET updated_at = datetime(\'now\') WHERE id = ?')
             .bind(params.propertyId)
             .run()
