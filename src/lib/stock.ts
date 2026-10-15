@@ -78,9 +78,10 @@ export function summarizePortfolio(summaries: PropertySummary[]) {
 }
 
 /** "atualizado hoje" ou "atualizado em 07/10", conforme a data do último check-in. */
-export function updatedLabel(iso: string | null, now = new Date()) {
+export function updatedLabel(iso: string | null) {
   if (!iso) return 'sem check-in'
   const date = new Date(iso)
-  if (date.toDateString() === now.toDateString()) return 'atualizado hoje'
-  return `atualizado em ${date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`
+  const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+  const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return `atualizado em ${dateStr} às ${timeStr}`
 }
