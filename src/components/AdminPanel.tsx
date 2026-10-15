@@ -1,8 +1,6 @@
-import { getUser } from '@/lib/auth'
 import { Loader2, Plus, Sparkles } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { LoginForm } from '@/components/HostDashboard'
-import { LogOut, Loader2, TriangleAlert } from 'lucide-react'
 import { getUser, login, logout } from '@/lib/auth'
 
 
