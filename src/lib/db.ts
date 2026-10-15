@@ -70,7 +70,8 @@ export async function acceptInvite(db: D1Database, token: string): Promise<void>
   await db.prepare('UPDATE invites SET accepted_at = datetime(\'now\') WHERE token = ?').bind(token).run()
 }
 
-export type PropertyRow = { id: string; user_id: string; name: string; address: string | null; active: number }
+// Encontre e modifique esta linha no seu lib/db.ts
+export type PropertyRow = { id: string; user_id: string; name: string; address: string | null; active: number; updated_at: string | null }
 
 export async function createProperty(db: D1Database, userId: string, name: string, address: string | null): Promise<string> {
   const id = crypto.randomUUID()
