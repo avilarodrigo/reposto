@@ -28,7 +28,7 @@ export const Route = createFileRoute('/api/auth/accept-invite')({
             return json({ message: 'Este e-mail já tem conta. Faça login.' }, 409)
           }
 
-          // Reserva o convite de forma atômica: só uma requisição consegue.
+          // Reserva o convite de forma atômica no Cloudflare D1
           if (!(await consumeInvite(env.DB, token))) {
             return json({ message: 'Convite já utilizado.' }, 400)
           }
@@ -38,15 +38,15 @@ export const Route = createFileRoute('/api/auth/accept-invite')({
             const hashed = await hashPassword(password)
             user = await createUser(env.DB, {
               email: invite.email,
-              // AJUSTADO: Retornado o [0] para extrair o texto antes do @ corretamente
+              // CORREÇÃO CRÍTICA: [0] extrai a string pura do nome do usuário para o SQLite
               name: invite.email.split('@')[0],
               password: hashed,
               role: invite.role,
             })
           } catch (err) {
-            await releaseInvite(env.DB, token) // não queima o convite se a criação falhar
-            console.error('Erro ao registrar usuário ou gerar hash:', err)
-            return json({ message: 'Erro ao criar a conta. O convite não foi queimado.' }, 500)
+            await releaseInvite(env.DB, token) // Libera o convite de volta se a inserção falhar
+            console.error('Erro ao registrar usuário na tabela users:', err)
+            return json({ message: 'Erro ao criar o usuário no banco de dados.' }, 500)
           }
 
           const jwt = await signJwt(
@@ -62,8 +62,8 @@ export const Route = createFileRoute('/api/auth/accept-invite')({
             },
           })
         } catch (globalError) {
-          console.error('Erro global na rota accept-invite:', globalError)
-          return json({ message: 'Erro interno ao processar o processamento do convite.' }, 500)
+          console.error('Erro de execução global no accept-invite:', globalError)
+          return json({ message: 'Erro interno ao processar a requisição do convite.' }, 500)
         }
       },
     },
