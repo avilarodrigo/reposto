@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "cat node_modules/@tanstack/react-start/package.json | grep -A8 peerDependencies; ls -a; vite build",
+    "build": "vite build",
     "start": "wrangler dev",
     "deploy": "vite build && wrangler deploy",
     "db:create": "wrangler d1 create reposto-db",
@@ -27,6 +27,7 @@
     "typescript": "^5.7.0",
     "vite": "^8.0.0",
     "vite-tsconfig-paths": "^5.1.0",
+    "tailwindcss": "^4.0.0",
     "wrangler": "^4.0.0"
   }
 }
