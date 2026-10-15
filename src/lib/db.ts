@@ -94,8 +94,20 @@ export async function getPropertyById(db: D1Database, propertyId: string): Promi
 }
 
 export async function getStockItems(db: D1Database, propertyId: string): Promise<StockItem[]> {
-  const result = await db.prepare('SELECT id, sku_id, name, detail, category, pct, threshold, updated_at FROM stock_items WHERE property_id = ? ORDER BY category, name').bind(propertyId).all<StockItem>()
-  return result.results
+  const result = await db
+    .prepare('SELECT id, sku_id, name, detail, category, pct, threshold, updated_at FROM stock_items WHERE property_id = ? ORDER BY category, name')
+    .bind(propertyId)
+    .all<{ id: string; sku_id: string; name: string; detail: string | null; category: string; pct: number; threshold: number; updated_at: string | null }>()
+
+  return result.results.map((row) => ({
+    id: row.id,
+    name: row.name,
+    detail: row.detail,
+    category: row.category,
+    pct: row.pct,
+    threshold: row.threshold,
+    updatedAt: row.updated_at, // <--- Converte snake_case para camelCase
+  }))
 }
 
 export async function getDashboardData(db: D1Database, userId: string) {
