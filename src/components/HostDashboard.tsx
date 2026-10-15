@@ -16,7 +16,7 @@ export function HostDashboard() {
   const [open, setOpen] = useState<string | null>(null)
 
   const loadDashboard = () =>
-    fetch('/api/dashboard')
+    fetch('/api/dashboard', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((body: Dashboard) => setData(body))
       .catch(() => setAuth('out'))
@@ -66,12 +66,14 @@ export function HostDashboard() {
           {properties.map((p) => {
             const expanded = open === p.id
             const alert = p.status === 'repor'
+            const lastUpdated = p.updatedAt || (p as any).updated_at
+
             return (
               <li key={p.id} className="rounded-3xl border border-fg/10 bg-surface p-5 sm:p-6">
                 <button type="button" onClick={() => setOpen(expanded ? null : p.id)} className="flex w-full items-start justify-between gap-4 text-left">
                   <div className="min-w-0">
                     <p className="truncate font-display text-xl font-semibold">{p.name}</p>
-                    <p className="mt-1 text-xs text-fg-muted">{p.updated_at ? updatedLabel(p.updated_at) : "Atualização pendente"}</p>
+                    <p className="mt-1 text-xs text-fg-muted">{lastUpdated ? updatedLabel(lastUpdated) : "Atualização pendente"}</p>
                   </div>
                   <StatusBadge alert={alert} />
                 </button>
@@ -93,7 +95,7 @@ export function HostDashboard() {
                       return (
                         <li key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 py-3">
                           <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{item.name}</p>
+                            <p className="truncate text-sm font-medium">{item.name}</p>
                           </div>
                           <span className={`text-sm font-semibold tabular-nums ${low ? 'text-brand' : 'text-fg-soft'}`}>{item.pct}%</span>
                           <div className="col-span-2 mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -112,6 +114,7 @@ export function HostDashboard() {
     </Frame>
   )
 }
+
 function StatusBadge({ alert }: { alert: boolean }) {
   return (
     <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${alert ? 'bg-brand/10 text-brand' : 'bg-success/15 text-success'}`}>
