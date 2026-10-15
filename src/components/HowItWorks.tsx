@@ -24,7 +24,7 @@ const steps = [
   },
 ]
 
-const deliveryImg = '/.netlify/images?url=/img/delivery.png&w=900&fm=webp&q=78'
+const deliveryImg = '/img/delivery.png?w=900&fm=webp&q=78'
 
 export function HowItWorks() {
   const [ref, p] = useSectionProgress<HTMLElement>()

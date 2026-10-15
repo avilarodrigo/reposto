@@ -1,9 +1,7 @@
-import { getUser } from '@netlify/identity'
 import { Loader2, Plus, Sparkles } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { LoginForm } from '@/components/HostDashboard'
-import { LogOut, Loader2, TriangleAlert } from 'lucide-react'
-import { getUser, login, logout } from '@netlify/identity'
+import { getUser, login, logout } from '@/lib/auth'
 
 
 type Property = { id: string; name: string; address: string | null; active: boolean }
