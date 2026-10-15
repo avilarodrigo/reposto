@@ -8,33 +8,40 @@ export const Route = createFileRoute('/api/auth/login')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = await request.json<any>()
-        const email = String(body.email ?? '').toLowerCase().trim()
-        const password = String(body.password ?? '')
-        if (!email || !password) {
-          return json({ message: 'E-mail e senha são obrigatórios.' }, 400)
+        try {
+          const body = await request.json<any>()
+          const email = String(body.email ?? '').toLowerCase().trim()
+          const password = String(body.password ?? '')
+          
+          if (!email || !password) {
+            return json({ message: 'E-mail e senha são obrigatórios.' }, 400)
+          }
+
+          const user = await findUserByEmail(env.DB, email)
+          if (!user) return json({ message: 'Credenciais inválidas.' }, 401)
+
+          const stored = await getUserPassword(env.DB, user.id)
+          if (!stored) return json({ message: 'Credenciais inválidas.' }, 401)
+
+          const ok = await verifyPassword(password, stored)
+          if (!ok) return json({ message: 'Credenciais inválidas.' }, 401)
+
+          const token = await signJwt(
+            { sub: user.id, email: user.email, name: user.name, role: user.role },
+            env.JWT_SECRET,
+          )
+          
+          return new Response(JSON.stringify(user), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Set-Cookie': sessionCookie(token),
+            },
+          })
+        } catch (error) {
+          console.error('Erro na rota de login:', error)
+          return json({ message: 'Erro interno no servidor de autenticação.' }, 500)
         }
-
-        const user = await findUserByEmail(env.DB, email)
-        if (!user) return json({ message: 'Credenciais inválidas.' }, 401)
-
-        const stored = await getUserPassword(env.DB, user.id)
-        if (!stored) return json({ message: 'Credenciais inválidas.' }, 401)
-
-        const ok = await verifyPassword(password, stored)
-        if (!ok) return json({ message: 'Credenciais inválidas.' }, 401)
-
-        const token = await signJwt(
-          { sub: user.id, email: user.email, name: user.name, role: user.role },
-          env.JWT_SECRET,
-        )
-        return new Response(JSON.stringify(user), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Set-Cookie': sessionCookie(token),
-          },
-        })
       },
     },
   },
