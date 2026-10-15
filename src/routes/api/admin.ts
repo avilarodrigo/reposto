@@ -1,10 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
 import { verifyJwt, getTokenFromRequest } from '@/lib/jwt'
-import { getAllHosts, createProperty, createUser, seedDemoProperties } from '@/lib/db'
+import {
+  getAllHosts,
+  createProperty,
+  createUser,
+  seedDemoProperties,
+  createInvite,
+  findUserByEmail,
+} from '@/lib/db'
 import { hashPassword } from '@/lib/password'
 
-async function requireAdmin(request: Request): Promise<Response | null> {
+type AdminPayload = NonNullable<Awaited<ReturnType<typeof verifyJwt>>>
+
+// Devolve o payload do admin autenticado ou uma Response de erro (401/403).
+async function requireAdmin(request: Request): Promise<AdminPayload | Response> {
   const token = getTokenFromRequest(request)
   if (!token) return json({ message: 'unauthorized' }, 401)
 
@@ -18,27 +28,49 @@ async function requireAdmin(request: Request): Promise<Response | null> {
   if (payload.role !== 'admin' && !adminEmails.includes(payload.email.toLowerCase())) {
     return json({ message: 'forbidden' }, 403)
   }
-  return null // autorizado
+  return payload
 }
 
 export const Route = createFileRoute('/api/admin')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const denied = await requireAdmin(request)
-        if (denied) return denied
+        const admin = await requireAdmin(request)
+        if (admin instanceof Response) return admin
 
         const hosts = await getAllHosts(env.DB)
         return json({ hosts })
       },
 
       POST: async ({ request }) => {
-        const denied = await requireAdmin(request)
-        if (denied) return denied
+        const admin = await requireAdmin(request)
+        if (admin instanceof Response) return admin
 
         const body = await request.json<any>()
 
         switch (String(body.action ?? '')) {
+          case 'create-invite': {
+            const email = String(body.email ?? '').toLowerCase().trim()
+            if (!email || !email.includes('@')) {
+              return json({ message: 'E-mail inválido.' }, 400)
+            }
+            if (await findUserByEmail(env.DB, email)) {
+              return json({ message: 'Este e-mail já tem conta.' }, 409)
+            }
+            const { token, expiresAt } = await createInvite(env.DB, {
+              email,
+              role: 'host', // convites criam só anfitriões; admins são criados direto no banco
+              createdBy: admin.sub,
+            })
+            const link = `${new URL(request.url).origin}/?token=${token}`
+            return json({
+              ok: true,
+              link,
+              expiresAt,
+              message: 'Convite criado. Envie o link ao anfitrião.',
+            })
+          }
+
           case 'create-host': {
             const email = String(body.email ?? '').toLowerCase().trim()
             const name = String(body.name ?? '').trim()
