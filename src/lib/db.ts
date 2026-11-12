@@ -93,9 +93,18 @@ export async function getPropertyById(db: D1Database, propertyId: string): Promi
   return db.prepare('SELECT id, user_id, name, address, active FROM properties WHERE id = ?').bind(propertyId).first<PropertyRow>()
 }
 
+const BRAND_BY_SKU = new Map(CATALOG.map((sku) => [sku.id, sku.brand] as const))
+
 export async function getStockItems(db: D1Database, propertyId: string): Promise<StockItem[]> {
-  const result = await db.prepare('SELECT id, sku_id, name, detail, category, pct, threshold, updated_at FROM stock_items WHERE property_id = ? ORDER BY category, name').bind(propertyId).all<StockItem>()
-  return result.results
+  const result = await db
+    .prepare('SELECT id, sku_id, name, detail, category, pct, threshold, updated_at FROM stock_items WHERE property_id = ? ORDER BY category, name')
+    .bind(propertyId)
+    .all<StockItem & { sku_id: string }>()
+
+  return result.results.map(({ sku_id, ...item }) => ({
+    ...item,
+    brand: BRAND_BY_SKU.get(sku_id) ?? null,
+  }))
 }
 
 export async function getDashboardData(db: D1Database, userId: string) {

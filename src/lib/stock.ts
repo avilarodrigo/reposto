@@ -16,6 +16,7 @@ export type StockItem = {
   id: string
   name: string
   detail: string | null
+  brand: string | null
   category: string
   pct: number
   threshold: number

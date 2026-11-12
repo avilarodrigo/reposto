@@ -7,7 +7,7 @@ import { WHATSAPP_DISPLAY, whatsappLink } from '@/lib/whatsapp'
 import { Logo } from './Header'
 
 export function Marquee() {
-  const items = catalog.map((s) => s.name)
+  const items = catalog.map((s) => `${s.name} — ${s.brand}`)
   return (
     <div className="overflow-hidden border-y border-fg/10 bg-brand py-5 text-inverse-fg" aria-hidden="true">
       <div className="marquee flex w-max gap-10 font-display text-2xl font-semibold sm:text-3xl">
@@ -89,7 +89,7 @@ function CountUp({ to, prefix = '', duration = 1400 }: { to: number; prefix?: st
 const numbers = [
   { to: 13, label: 'itens essenciais no catálogo', note: 'Só o que realmente acaba entre uma estadia e outra.' },
   { to: 60, prefix: 'R$ ', label: 'pedido mínimo por imóvel', note: 'O kit check-in sai por volta de R$ 107.' },
-  { to: 1, label: 'painel de estoque para todos os imóveis', note: 'Consumo, alertas e reposições num lugar só.' },
+  { to: 1, label: 'painel de estoque para todos os imóveis', note: 'Níveis atualizados pelo QR Code, alertas e reposições num lugar só.' },
   { to: 0, label: 'aplicativos para instalar', note: 'Pedido, ajuste e pagamento pelo WhatsApp.' },
 ]
 
@@ -123,10 +123,12 @@ export function Numbers() {
 }
 
 const faqs = [
+  { q: 'O que é o piloto da Reposto?', a: 'É um teste acompanhado com um grupo pequeno de anfitriões e gestoras. A gente monta o kit do primeiro imóvel, combina a entrega e ajusta o ciclo junto com você, pelo WhatsApp. As vagas são limitadas.' },
   { q: 'Preciso instalar algum aplicativo?', a: 'Não. Você monta o kit aqui na página, envia pelo WhatsApp e acompanha tudo pela conversa: confirmação, pagamento e entrega.' },
+  { q: 'Quais marcas vocês usam?', a: 'Trabalhamos com marcas conhecidas onde existe, como Neve, Palmolive, Scala Plus, Ypê, Veja, Pilão, Melitta e União. Se um item faltar, a gente combina uma alternativa com você antes de entregar.' },
   { q: 'Qual é o pedido mínimo?', a: 'R$ 60 por imóvel, por ciclo. Assim a entrega fica incluída no preço.' },
   { q: 'Posso ter um kit diferente para cada imóvel?', a: 'Pode. Um studio e uma casa de quatro quartos não gastam o mesmo. Basta avisar na conversa quais itens mudam em cada endereço.' },
-  { q: 'Como funciona o painel de estoque?', a: 'Você acompanha o nível de cada item em cada imóvel. O consumo é estimado pelos check-ins e você recebe o aviso antes de faltar.' },
+  { q: 'Como funciona o painel de estoque?', a: 'A diarista atualiza o nível de cada item pelo QR Code do imóvel, em poucos segundos. Você vê tudo no painel e a gente combina a reposição no ciclo seguinte.' },
   { q: 'Como funciona o pagamento?', a: 'Enviamos um link de pagamento por Pix ou cartão depois de confirmar itens, endereços e data de entrega.' },
   { q: 'Quais regiões vocês atendem?', a: 'Atendemos regiões com concentração de imóveis de temporada. Mande o endereço no WhatsApp e confirmamos a cobertura na hora.' },
   { q: 'E se faltar algo antes do próximo ciclo?', a: 'Você pode pedir uma reposição avulsa pela mesma conversa. Também podemos ajustar a frequência se o consumo mudar.' },
@@ -163,14 +165,17 @@ export function FinalCta() {
         <h2 data-reveal style={{ '--d': '80ms' } as CSSProperties} className="mt-4 max-w-5xl font-display text-5xl leading-[0.98] font-semibold tracking-tight sm:text-7xl lg:text-8xl">
           Próximo check-in, sem correria.
         </h2>
+        <p data-reveal style={{ '--d': '140ms' } as CSSProperties} className="mt-6 max-w-xl text-lg leading-relaxed text-inverse-fg/80">
+          O piloto da Reposto está aberto para um grupo pequeno de anfitriões e gestoras. A gente acompanha de perto o primeiro ciclo.
+        </p>
         <div data-reveal style={{ '--d': '180ms' } as CSSProperties} className="mt-12 flex flex-col gap-6 sm:flex-row sm:items-center">
-          <a href={whatsappLink('Olá! Quero começar o abastecimento recorrente para meus imóveis.')} target="_blank" rel="noreferrer" className="group inline-flex items-center justify-center gap-3 rounded-full bg-surface px-8 py-5 text-lg font-semibold text-fg transition hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(15,23,42,0.6)] active:translate-y-0">
+          <a href="#piloto" className="group inline-flex items-center justify-center gap-3 rounded-full bg-surface px-8 py-5 text-lg font-semibold text-fg transition hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(15,23,42,0.6)] active:translate-y-0">
             <MessageCircle className="h-5 w-5 text-success" />
-            Quero montar meu kit
+            Quero participar do piloto da Reposto
             <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
           <p className="text-inverse-fg/80">
-            ou chame no <span className="font-semibold text-inverse-fg">{WHATSAPP_DISPLAY}</span>
+            ou chame no <a href={whatsappLink()} target="_blank" rel="noreferrer" className="font-semibold text-inverse-fg underline-offset-4 hover:underline">{WHATSAPP_DISPLAY}</a>
           </p>
         </div>
       </div>

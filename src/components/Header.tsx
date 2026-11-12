@@ -1,6 +1,5 @@
-import { MessageCircle } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { usePageScroll } from '@/lib/scroll'
-import { whatsappLink } from '@/lib/whatsapp'
 import { ThemeToggle } from './ThemeToggle'
 
 const links = [
@@ -8,6 +7,7 @@ const links = [
   { href: '#como-funciona', label: 'Como funciona' },
   { href: '#painel', label: 'Painel de estoque' },
   { href: '#kit', label: 'Monte seu kit' },
+  { href: '#piloto', label: 'Piloto' },
   { href: '#faq', label: 'Dúvidas' },
 ]
 
@@ -35,7 +35,7 @@ export function Header() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-8">
         <Logo />
-        <nav className="hidden items-center gap-7 text-sm font-medium text-fg-soft lg:flex">
+        <nav className="hidden items-center gap-5 text-sm font-medium text-fg-soft lg:flex xl:gap-7">
           {links.map((l) => (
             <a key={l.href} href={l.href} className="transition-colors hover:text-brand">
               {l.label}
@@ -45,14 +45,12 @@ export function Header() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <a
-            href={whatsappLink()}
-            target="_blank"
-            rel="noreferrer"
+            href="#piloto"
             className="inline-flex items-center gap-2 rounded-full bg-inverse px-4 py-2 text-sm font-semibold text-inverse-fg transition hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
           >
-            <MessageCircle className="h-4 w-4 text-success" />
-            <span className="hidden sm:inline">Falar no WhatsApp</span>
-            <span className="sm:hidden">WhatsApp</span>
+            <ArrowUpRight className="h-4 w-4 text-success" />
+            <span className="hidden sm:inline">Participar do piloto</span>
+            <span className="sm:hidden">Piloto</span>
           </a>
         </div>
       </div>

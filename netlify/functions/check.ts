@@ -59,7 +59,9 @@ export default async (req: Request) => {
       .onConflictDoUpdate({ target: stockLevels.itemId, set: { levelPct: pct, updatedAt: now } })
     await db.insert(stockEvents).values({ itemId, levelPct: pct, source: 'diarista' })
 
-    if (crossedBelow(item.pct, pct, item.threshold)) crossed.push({ itemId, name: item.name, pct })
+    if (crossedBelow(item.pct, pct, item.threshold)) {
+      crossed.push({ itemId, name: item.brand ? `${item.name} (${item.brand})` : item.name, pct })
+    }
   }
 
   let alertStatus: 'enviado' | 'falhou' | null = null

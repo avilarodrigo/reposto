@@ -7,7 +7,7 @@ import { AuthCallback } from '@/components/AuthCallback'
 
 const siteName = 'Reposto — Abastecimento recorrente para imóveis de temporada'
 const siteDescription =
-  'Papel, café, limpeza e amenities entregues por imóvel, no ciclo certo. Monte o kit, pague e receba antes do próximo check-in.'
+  'Papel, café, limpeza e amenities de marcas conhecidas, entregues por imóvel no ciclo certo. Monte o kit ou participe do piloto da Reposto antes do próximo check-in.'
 
 export const Route = createRootRoute({
   head: () => ({

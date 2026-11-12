@@ -39,7 +39,7 @@ export function KitBuilder() {
     `Frequência: ${frequency}`,
     '',
     'Itens por imóvel:',
-    ...lines.map((l) => `• ${l.q}× ${l.name} (${l.detail}) — ${brl(l.price * l.q)}`),
+    ...lines.map((l) => `• ${l.q}× ${l.name} — ${l.brand} (${l.detail}) — ${brl(l.price * l.q)}`),
     '',
     `Total por imóvel: ${brl(perProperty)}`,
     `Total do ciclo: ${brl(total)}`,
@@ -55,7 +55,7 @@ export function KitBuilder() {
             Monte o kit de um imóvel. A gente replica para todos.
           </h2>
           <p data-reveal style={{ '--d': '120ms' } as React.CSSProperties} className="max-w-md text-lg leading-relaxed text-fg-soft">
-            Treze itens essenciais, com preço por unidade à mostra. O pedido vai pronto para o WhatsApp e a gente confirma entrega e pagamento por lá.
+            Treze itens essenciais, com marca e preço por unidade à mostra. Usamos marcas conhecidas onde existe; se faltar, a gente combina uma alternativa no WhatsApp antes de entregar.
           </p>
         </div>
 
@@ -83,9 +83,13 @@ export function KitBuilder() {
                           <li key={s.id} className={`flex items-center justify-between gap-4 py-3 transition-opacity ${q ? '' : 'opacity-60 hover:opacity-100'}`}>
                             <div className="min-w-0">
                               <p className="font-medium">{s.name}</p>
-                              <p className="text-sm text-fg-soft">
-                                {s.detail} · {brl(s.price)}
+                              <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fg-soft">
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-fg">{s.brand}</span>
+                                <span>
+                                  {s.detail} · {brl(s.price)}
+                                </span>
                               </p>
+                              {s.note && <p className="mt-1 text-xs leading-relaxed text-brand">{s.note}</p>}
                             </div>
                             <Stepper value={q} onChange={(n) => set(s.id, n)} label={s.name} max={10} />
                           </li>
@@ -117,6 +121,7 @@ export function KitBuilder() {
                   </button>
                 ))}
               </div>
+              <p className="mt-2 text-xs leading-relaxed text-inverse-fg/50">No piloto, a frequência é confirmada com a gente antes da primeira entrega.</p>
             </fieldset>
 
             <dl className="mt-7 space-y-3 border-t border-inverse-fg/15 pt-6">

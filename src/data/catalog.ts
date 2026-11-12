@@ -1,5 +1,11 @@
 // Essentials basket for the recurring supply catalog (13 SKUs).
 // Prices are reference values, adjustable per cycle.
+//
+// `brand` is the brand shown on the site: the known-brand option from the
+// "Cesta e margem" scenario in Reposto_Cotacao_Insumos.xlsx. `brandEconomy`
+// keeps the cheaper atacarejo alternative documented for supplier negotiation.
+// The site intentionally shows the known brand, matching the BMC promise of
+// "marcas conhecidas, preço próximo ao varejo".
 
 export type Category = 'Banheiro' | 'Cozinha' | 'Limpeza' | 'Café da manhã'
 
@@ -9,22 +15,123 @@ export type Sku = {
   detail: string
   category: Category
   price: number
+  brand: string
+  brandEconomy?: string
+  note?: string
 }
 
 export const catalog: Sku[] = [
-  { id: 'papel-hig', name: 'Papel higiênico folha dupla', detail: '12 rolos', category: 'Banheiro', price: 22.9 },
-  { id: 'sabonete', name: 'Sabonete líquido', detail: 'refil 250 ml', category: 'Banheiro', price: 8.9 },
-  { id: 'amenities', name: 'Kit amenities', detail: 'shampoo + condicionador, 4 un', category: 'Banheiro', price: 12.5 },
-  { id: 'papel-toalha', name: 'Papel toalha', detail: '2 rolos', category: 'Cozinha', price: 7.6 },
-  { id: 'detergente', name: 'Detergente neutro', detail: '500 ml', category: 'Cozinha', price: 3.49 },
-  { id: 'esponja', name: 'Esponja dupla face', detail: '3 un', category: 'Cozinha', price: 5.7 },
-  { id: 'saco-lixo', name: 'Saco de lixo 50 L', detail: '30 un', category: 'Limpeza', price: 11.8 },
-  { id: 'multiuso', name: 'Limpador multiuso', detail: '500 ml', category: 'Limpeza', price: 6.2 },
-  { id: 'alcool', name: 'Álcool 70%', detail: '1 L', category: 'Limpeza', price: 9.8 },
-  { id: 'cafe', name: 'Café torrado e moído', detail: '250 g', category: 'Café da manhã', price: 17.4 },
-  { id: 'filtro', name: 'Filtro de papel nº 103', detail: '30 un', category: 'Café da manhã', price: 4.9 },
-  { id: 'acucar', name: 'Açúcar refinado', detail: '1 kg', category: 'Café da manhã', price: 5.3 },
-  { id: 'agua', name: 'Água mineral', detail: '6 × 1,5 L', category: 'Café da manhã', price: 14.9 },
+  {
+    id: 'papel-hig',
+    name: 'Papel higiênico folha dupla',
+    detail: '12 rolos',
+    category: 'Banheiro',
+    price: 22.9,
+    brand: 'Neve',
+    brandEconomy: 'Max Pure',
+  },
+  {
+    id: 'sabonete',
+    name: 'Sabonete líquido',
+    detail: 'refil 250 ml',
+    category: 'Banheiro',
+    price: 8.9,
+    brand: 'Palmolive',
+  },
+  {
+    id: 'amenities',
+    name: 'Kit amenities',
+    detail: 'shampoo + condicionador, 4 un',
+    category: 'Banheiro',
+    price: 12.5,
+    brand: 'Conamore',
+  },
+  {
+    id: 'papel-toalha',
+    name: 'Papel toalha',
+    detail: '2 rolos',
+    category: 'Cozinha',
+    price: 7.6,
+    brand: 'Scala Plus',
+    brandEconomy: 'Piccola',
+  },
+  {
+    id: 'detergente',
+    name: 'Detergente neutro',
+    detail: '500 ml',
+    category: 'Cozinha',
+    price: 3.49,
+    brand: 'Ypê',
+    brandEconomy: 'Bulnez',
+  },
+  {
+    id: 'esponja',
+    name: 'Esponja dupla face',
+    detail: '3 un',
+    category: 'Cozinha',
+    price: 5.7,
+    brand: 'Alklin',
+  },
+  {
+    id: 'saco-lixo',
+    name: 'Saco de lixo 50 L',
+    detail: '30 un',
+    category: 'Limpeza',
+    price: 11.8,
+    brand: 'Santa Maria',
+    brandEconomy: 'Embalixo',
+  },
+  {
+    id: 'multiuso',
+    name: 'Limpador multiuso',
+    detail: '500 ml',
+    category: 'Limpeza',
+    price: 6.2,
+    brand: 'Veja',
+  },
+  {
+    id: 'alcool',
+    name: 'Álcool 70%',
+    detail: '1 L',
+    category: 'Limpeza',
+    price: 9.8,
+    brand: 'Tupi',
+    note: 'Marca de referência para álcool. No piloto, usamos a versão gel 70%, permitida pela Anvisa; a líquida é restrita.',
+  },
+  {
+    id: 'cafe',
+    name: 'Café torrado e moído',
+    detail: '250 g',
+    category: 'Café da manhã',
+    price: 17.4,
+    brand: 'Pilão',
+  },
+  {
+    id: 'filtro',
+    name: 'Filtro de papel nº 103',
+    detail: '30 un',
+    category: 'Café da manhã',
+    price: 4.9,
+    brand: 'Melitta',
+    brandEconomy: 'Brigitta',
+  },
+  {
+    id: 'acucar',
+    name: 'Açúcar refinado',
+    detail: '1 kg',
+    category: 'Café da manhã',
+    price: 5.3,
+    brand: 'União',
+    brandEconomy: 'Da Barra',
+  },
+  {
+    id: 'agua',
+    name: 'Água mineral',
+    detail: '6 × 1,5 L',
+    category: 'Café da manhã',
+    price: 14.9,
+    brand: 'Claríssima',
+  },
 ]
 
 export const MIN_ORDER = 60

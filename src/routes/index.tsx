@@ -5,6 +5,7 @@ import { HowItWorks } from '@/components/HowItWorks'
 import { KitBuilder } from '@/components/KitBuilder'
 import { PainStory } from '@/components/PainStory'
 import { StockDashboard } from '@/components/StockDashboard'
+import { PilotForm } from '@/components/PilotForm'
 import { Audience, Faq, FinalCta, FloatingWhatsApp, Footer, Marquee, Numbers } from '@/components/Sections'
 import { useReveal } from '@/lib/scroll'
 
@@ -27,6 +28,7 @@ function Home() {
         <KitBuilder />
         <Numbers />
         <Faq />
+        <PilotForm />
         <FinalCta />
       </main>
       <Footer />

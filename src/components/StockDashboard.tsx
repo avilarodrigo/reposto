@@ -5,23 +5,23 @@ const features = [
   {
     icon: Gauge,
     title: 'Nível de cada item',
-    text: 'Veja quanto resta de papel, café e limpeza em cada imóvel, em porcentagem, sem precisar contar nada.',
+    text: 'Veja quanto resta de papel, café e limpeza em cada imóvel, em porcentagem. A diarista atualiza pelo QR Code em poucos segundos.',
   },
   {
     icon: BellRing,
     title: 'Aviso antes da falta',
-    text: 'Quando um item chega perto do ponto de reposição, o alerta vai para o seu WhatsApp.',
+    text: 'No piloto, a gente avisa você pelo WhatsApp quando um item chega perto do ponto de reposição.',
   },
   {
     icon: CalendarClock,
     title: 'Reposição no ciclo certo',
-    text: 'O consumo é estimado pelos check-ins de cada endereço, e a próxima entrega já sai calculada.',
+    text: 'A reposição entra no ciclo seguinte, com o kit já separado por endereço e conferido pela equipe.',
   },
 ]
 
 const properties = [
   { name: 'Apto 302 · Beira-mar', next: 'Próximo check-in em 3 dias', health: 82, status: 'Em dia' },
-  { name: 'Casa 4 quartos · Jardim', next: 'Papel e café abaixo do ideal', health: 34, status: 'Repor em 1 dia' },
+  { name: 'Casa 4 quartos · Jardim', next: 'Papel Neve e café Pilão abaixo do ideal', health: 34, status: 'Repor em 1 dia' },
   { name: 'Studio Centro', next: 'Próximo check-in em 6 dias', health: 61, status: 'Em dia' },
   { name: 'Apto 1205 · Vista mar', next: 'Próximo check-in em 9 dias', health: 90, status: 'Em dia' },
 ]
@@ -44,7 +44,7 @@ export function StockDashboard() {
             </h2>
           </div>
           <p data-reveal style={{ '--d': '120ms' } as CSSProperties} className="max-w-md text-lg leading-relaxed text-fg-soft">
-            Saiba o que está acabando em cada endereço antes do próximo hóspede. Você decide o que repor, e a gente cuida da entrega.
+            Saiba o que está acabando em cada endereço antes do próximo hóspede. A diarista atualiza o estoque pelo QR Code, você decide o que repor e a gente cuida da entrega.
           </p>
         </div>
 

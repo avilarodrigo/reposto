@@ -10,7 +10,7 @@ const steps = [
   {
     n: '02',
     title: 'Escolha ou ajuste o kit',
-    text: 'Comece pelo kit check-in ou monte do zero com os itens essenciais. Cada endereço pode ter o seu.',
+    text: 'Comece pelo kit check-in com marcas conhecidas ou monte do zero com os itens essenciais. Cada endereço pode ter o seu.',
   },
   {
     n: '03',
@@ -20,7 +20,7 @@ const steps = [
   {
     n: '04',
     title: 'Receba no endereço',
-    text: 'Tudo separado e identificado por imóvel. No ciclo seguinte, a gente lembra você antes de acabar.',
+    text: 'Tudo separado e identificado por imóvel. No ciclo seguinte, a diarista atualiza o estoque pelo QR Code e a gente repõe antes de acabar.',
   },
 ]
 
@@ -45,9 +45,14 @@ export function HowItWorks() {
     <section id="como-funciona" ref={ref} className="relative h-[360vh] bg-page">
       <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
         <div className="mx-auto mb-8 flex w-full max-w-7xl items-end justify-between gap-6 px-5 pt-16 md:px-8">
-          <h2 className="max-w-2xl font-display text-4xl leading-[1.02] font-semibold tracking-tight sm:text-6xl">
-            Quatro passos. Nenhum app.
-          </h2>
+          <div>
+            <h2 className="max-w-2xl font-display text-4xl leading-[1.02] font-semibold tracking-tight sm:text-6xl">
+              Quatro passos. Nenhum app.
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-fg-soft sm:text-base">
+              No piloto, a operação é concierge: você fala com a gente pelo WhatsApp e a gente ajusta o kit, o ciclo e a entrega junto com você.
+            </p>
+          </div>
           <div className="hidden w-48 md:block">
             <div className="h-1 overflow-hidden rounded-full bg-fg/10">
               <div className="h-full origin-left bg-brand" style={{ transform: `scaleX(${p})` }} />

@@ -21,11 +21,11 @@ const steps = [
 ]
 
 const stock = [
-  { name: 'Papel higiênico', start: 72, drop: 0.95 },
-  { name: 'Café', start: 58, drop: 0.85 },
-  { name: 'Detergente', start: 80, drop: 0.7 },
-  { name: 'Saco de lixo', start: 46, drop: 0.9 },
-  { name: 'Sabonete', start: 64, drop: 0.6 },
+  { name: 'Papel higiênico', brand: 'Neve', start: 72, drop: 0.95 },
+  { name: 'Café', brand: 'Pilão', start: 58, drop: 0.85 },
+  { name: 'Detergente', brand: 'Ypê', start: 80, drop: 0.7 },
+  { name: 'Saco de lixo', brand: 'Santa Maria', start: 46, drop: 0.9 },
+  { name: 'Sabonete', brand: 'Palmolive', start: 64, drop: 0.6 },
 ]
 
 export function PainStory() {
@@ -104,9 +104,12 @@ export function PainStory() {
                 const low = level < 20
                 return (
                   <li key={s.name}>
-                    <div className="mb-1.5 flex justify-between text-sm font-medium">
-                      <span>{s.name}</span>
-                      <span className={`tabular-nums ${low && !solved ? 'text-brand' : 'text-fg-soft'}`}>{Math.round(level)}%</span>
+                    <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm font-medium">
+                      <span className="flex min-w-0 items-baseline gap-1.5">
+                        <span className="truncate">{s.name}</span>
+                        <span className="shrink-0 text-[11px] font-normal text-fg-muted">{s.brand}</span>
+                      </span>
+                      <span className={`shrink-0 tabular-nums ${low && !solved ? 'text-brand' : 'text-fg-soft'}`}>{Math.round(level)}%</span>
                     </div>
                     <div className="h-2.5 overflow-hidden rounded-full bg-fg/8">
                       <div

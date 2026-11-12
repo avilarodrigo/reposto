@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { type PropertySummary, updatedLabel } from '@/lib/stock'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { whatsappLink } from '@/lib/whatsapp'
 
 type Props = { propertyId: string }
 
@@ -27,7 +28,7 @@ export function CheckForm({ propertyId }: Props) {
       .filter((_, i) => form.get(`item-${i}`) === 'on')
       .map((item) => {
         const qty = Number(form.get(`qty-${item.id}`)) || 1
-        return `${qty}× ${item.name}`
+        return `${qty}× ${item.name}${item.brand ? ` — ${item.brand}` : ''}`
       })
 
     if (items.length === 0) {
@@ -39,9 +40,8 @@ export function CheckForm({ propertyId }: Props) {
 
     const host = data
     const message = `Reposição para ${host.name}:\n\n${items.join('\n')}`
-    const link = `https://wa.me/5511987654321?text=${encodeURIComponent(message)}`
 
-    window.location.href = link
+    window.location.href = whatsappLink(message)
   }
 
   return (
@@ -80,7 +80,10 @@ export function CheckForm({ propertyId }: Props) {
                     />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">{item.name}</p>
-                      <p className="mt-1 text-xs text-fg-muted">{updatedLabel(item.updatedAt)}</p>
+                      <p className="mt-1 text-xs text-fg-muted">
+                        {item.brand ? `${item.brand} · ` : ''}
+                        {updatedLabel(item.updatedAt)}
+                      </p>
                       <div className="mt-2 flex items-center gap-2">
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                           <div className={`h-full origin-left rounded-full ${low ? 'bg-brand' : 'bg-success'}`} style={{ transform: `scaleX(${item.pct / 100})` }} />
