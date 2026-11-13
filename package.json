@@ -6,7 +6,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "wrangler dev",
-    "deploy": "vite build && wrangler deploy",
+    "deploy:preview": "bun -e 'delete process.env.WRANGLER_CI_MATCH_TAG; Bun.spawnSync([\"npx\", \"wrangler\", \"versions\", \"upload\"], { stdio: [\"inherit\", \"inherit\", \"inherit\"] })'",
     "db:create": "wrangler d1 create reposto-db",
     "db:migrate": "wrangler d1 execute reposto-db --file=./schema.sql",
     "db:migrate:local": "wrangler d1 execute reposto-db --local --file=./schema.sql"
