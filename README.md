@@ -9,7 +9,7 @@ A página muda conforme a rolagem:
 - **Como funciona** — a rolagem vertical move os quatro passos na horizontal.
 - **Painel de estoque** — visão do controle de estoque por imóvel, com alertas e reposição no ciclo.
 - **Monte seu kit** — catálogo com 13 itens, marca e preço por unidade, quantidade de imóveis, frequência e pedido mínimo de R$ 60; o pedido vai pré-preenchido para o WhatsApp.
-- **Piloto** — formulário curto de captação (nome, WhatsApp, imóveis, bairros e abastecimento atual) que abre a conversa no WhatsApp com os dados preenchidos.
+- **Piloto** — formulário curto de captação (nome, WhatsApp, imóveis, bairros e abastecimento atual). O lead é salvo em D1 (`pilot_leads`, visível em `/admin`) e a conversa abre no WhatsApp com os dados preenchidos.
 - **Para quem é, Números, Dúvidas e chamada final**, além de um botão flutuante de WhatsApp.
 
 > O número de WhatsApp é fictício (`src/lib/whatsapp.ts`). Troque pelo número real antes de divulgar.
@@ -29,5 +29,5 @@ netlify dev   # ou: pnpm dev
 
 - Catálogo, marcas, preços, pedido mínimo e kit inicial: `src/data/catalog.ts`
 - Número e mensagens do WhatsApp: `src/lib/whatsapp.ts`
-- Formulário do piloto: `src/components/PilotForm.tsx`
+- Formulário e base de leads do piloto: `src/components/PilotForm.tsx` + `src/routes/api/pilot.ts`
 - Seções da página: `src/components/`

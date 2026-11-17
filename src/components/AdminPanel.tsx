@@ -6,6 +6,7 @@ import { getUser, login, logout } from '@/lib/auth'
 
 type Property = { id: string; name: string; address: string | null; active: boolean }
 type Host = { id: string; email: string; name: string | null; whatsapp: string | null; identityId: string | null; properties: Property[] }
+type Lead = { id: string; name: string; whatsapp: string; properties: string; neighborhoods: string; currentSupply: string | null; createdAt: string }
 
 const field = 'mt-1.5 w-full rounded-xl border border-fg/15 bg-page px-4 py-3 outline-none focus:border-brand'
 
@@ -14,6 +15,7 @@ export function AdminPanel() {
   const [auth, setAuth] = useState<'checking' | 'out' | 'in'>('checking')
   const [forbidden, setForbidden] = useState(false)
   const [hosts, setHosts] = useState<Host[] | null>(null)
+  const [leads, setLeads] = useState<Lead[] | null>(null)
   const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -32,7 +34,19 @@ export function AdminPanel() {
     return data
   }
 
-  const load = () => api().then((d) => setHosts(d.hosts)).catch((e: Error) => setMessage({ tone: 'error', text: e.message }))
+  const loadLeads = () =>
+    fetch('/api/pilot')
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('fetch_leads'))))
+      .then((d: { leads: Lead[] }) => setLeads(d.leads ?? []))
+      .catch(() => setLeads([]))
+
+  const load = () =>
+    api()
+      .then(async (d) => {
+        setHosts(d.hosts)
+        await loadLeads()
+      })
+      .catch((e: Error) => setMessage({ tone: 'error', text: e.message }))
 
   useEffect(() => {
     getUser().then((user) => {
@@ -213,8 +227,43 @@ export function AdminPanel() {
           </ul>
         )}
       </section>
+
+      <section className="mt-10">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-xl font-semibold">Leads do piloto</h2>
+          {leads && <p className="text-sm text-fg-muted">{leads.length} contato(s)</p>}
+        </div>
+        {!leads ? (
+          <Loader2 className="mt-4 h-6 w-6 animate-spin text-fg-muted" />
+        ) : leads.length === 0 ? (
+          <p className="mt-4 text-fg-soft">Nenhum lead do formulário ainda.</p>
+        ) : (
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {leads.map((lead) => (
+              <li key={lead.id} className="rounded-3xl border border-fg/10 bg-surface p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-semibold">{lead.name}</p>
+                  <span className="shrink-0 text-xs text-fg-muted">{formatLeadDate(lead.createdAt)}</span>
+                </div>
+                <p className="mt-1 text-sm text-fg-soft">
+                  {lead.whatsapp} · {lead.properties}
+                </p>
+                <p className="mt-1 text-sm text-fg-soft">Bairros: {lead.neighborhoods}</p>
+                {lead.currentSupply && <p className="mt-2 text-xs leading-relaxed text-fg-muted">Abastece hoje: {lead.currentSupply}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </Frame>
   )
+}
+
+/** created_at vem de datetime('now') do SQLite (UTC, sem sufixo). */
+function formatLeadDate(sqlite: string) {
+  const date = new Date(sqlite.includes('T') ? `${sqlite}Z` : `${sqlite.replace(' ', 'T')}Z`)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 function Frame({ children }: { children: React.ReactNode }) {

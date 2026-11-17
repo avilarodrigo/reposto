@@ -39,8 +39,21 @@ export function PilotForm() {
       .filter(Boolean)
       .join('\n')
 
-    // O MVP concierge registra o lead na conversa do WhatsApp. Para uma base
-    // única, envie o mesmo payload para /api/pilot (D1) ou para o CRM antes de abrir o link.
+    // Base única de leads: o mesmo payload vai para o D1 antes de abrir o
+    // WhatsApp. Falha na gravação não bloqueia o contato com o time.
+    void fetch('/api/pilot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        whatsapp: whatsapp.replace(/\D/g, ''),
+        properties,
+        neighborhoods,
+        currentSupply: current,
+        interest: true,
+      }),
+    }).catch(() => null)
+
     const url = whatsappLink(message)
     setLink(url)
     window.open(url, '_blank', 'noopener,noreferrer')
@@ -141,7 +154,7 @@ export function PilotForm() {
           )}
 
           <p className="mt-3 text-center text-xs text-fg-muted">
-            Ao enviar, abrimos o WhatsApp com seus dados preenchidos. A equipe registra o contato na base do piloto.
+            Ao enviar, abrimos o WhatsApp com seus dados preenchidos e o contato entra na base do piloto.
           </p>
         </form>
       </div>

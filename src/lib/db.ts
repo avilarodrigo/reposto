@@ -124,6 +124,52 @@ export async function getPropertySummary(db: D1Database, propertyId: string): Pr
   return summarizeProperty({ id: prop.id, name: prop.name, address: prop.address, items })
 }
 
+const PILOT_LEADS_TABLE = `CREATE TABLE IF NOT EXISTS pilot_leads (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  whatsapp TEXT NOT NULL,
+  properties TEXT NOT NULL,
+  neighborhoods TEXT NOT NULL,
+  current_supply TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+)`
+
+export type PilotLead = {
+  id: string
+  name: string
+  whatsapp: string
+  properties: string
+  neighborhoods: string
+  currentSupply: string | null
+  createdAt: string
+}
+
+/** Salva o lead do formulário do piloto. Cria a tabela na primeira gravação. */
+export async function createPilotLead(
+  db: D1Database,
+  data: { name: string; whatsapp: string; properties: string; neighborhoods: string; currentSupply?: string | null },
+): Promise<void> {
+  await db.batch([
+    db.prepare(PILOT_LEADS_TABLE),
+    db
+      .prepare('INSERT INTO pilot_leads (id, name, whatsapp, properties, neighborhoods, current_supply) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(crypto.randomUUID(), data.name, data.whatsapp, data.properties, data.neighborhoods, data.currentSupply ?? null),
+  ])
+}
+
+/** Últimos leads do piloto, do mais recente para o mais antigo. */
+export async function getPilotLeads(db: D1Database): Promise<PilotLead[]> {
+  const result = await db
+    .prepare('SELECT id, name, whatsapp, properties, neighborhoods, current_supply, created_at FROM pilot_leads ORDER BY created_at DESC, rowid DESC LIMIT 200')
+    .all<{ id: string; name: string; whatsapp: string; properties: string; neighborhoods: string; current_supply: string | null; created_at: string }>()
+
+  return result.results.map(({ current_supply, created_at, ...lead }) => ({
+    ...lead,
+    currentSupply: current_supply,
+    createdAt: created_at,
+  }))
+}
+
 export type HostWithProperties = {
   id: string; email: string; name: string | null; whatsapp: string | null; identityId: string | null
   properties: { id: string; name: string; address: string | null; active: boolean }[]
