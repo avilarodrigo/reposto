@@ -1,4 +1,4 @@
-import { Loader2, Plus, Sparkles } from 'lucide-react'
+import { Loader2, LogOut, Plus, Sparkles } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { LoginForm } from '@/components/HostDashboard'
 import { getUser, login, logout } from '@/lib/auth'
