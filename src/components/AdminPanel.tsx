@@ -16,6 +16,7 @@ export function AdminPanel() {
   const [forbidden, setForbidden] = useState(false)
   const [hosts, setHosts] = useState<Host[] | null>(null)
   const [leads, setLeads] = useState<Lead[] | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -51,6 +52,7 @@ export function AdminPanel() {
   useEffect(() => {
     getUser().then((user) => {
       if (!user) return setAuth('out')
+      setUserEmail(user.email)
       setAuth('in')
       load()
     })
@@ -100,9 +102,30 @@ export function AdminPanel() {
   if (forbidden) {
     return (
       <Frame>
-        <p className="mx-auto mt-16 max-w-sm rounded-3xl border border-fg/10 bg-surface p-7 text-center text-fg-soft">
-          Esta conta não é administradora. Entre com um e-mail autorizado.
-        </p>
+        <div className="mx-auto mt-16 max-w-sm rounded-3xl border border-fg/10 bg-surface p-7 text-center">
+          <p className="text-fg-soft">
+            {userEmail
+              ? (
+                <>
+                  Você entrou como <span className="font-semibold text-fg">{userEmail}</span>, mas esta conta não é administradora.
+                </>
+              )
+              : 'Esta conta não é administradora.'}{' '}
+            Entre com um e-mail autorizado (o admin cadastrado em <code className="rounded bg-muted px-1 py-0.5 text-xs">ADMIN_EMAILS</code>).
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              await logout()
+              setForbidden(false)
+              setUserEmail(null)
+              setAuth('out')
+            }}
+            className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-fg/15 px-4 py-2 text-sm font-semibold transition hover:border-fg active:scale-95"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sair e trocar de conta
+          </button>
+        </div>
       </Frame>
     )
   }

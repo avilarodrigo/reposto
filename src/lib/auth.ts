@@ -42,7 +42,7 @@ export async function login(email: string, password: string): Promise<AuthUser> 
 export async function logout(): Promise<void> {
   await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
   cachedUser = null
-  checked = true
+  checked = false
 }
 
 export async function acceptInvite(token: string, password: string): Promise<AuthUser> {
